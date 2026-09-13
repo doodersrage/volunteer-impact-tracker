@@ -1,0 +1,50 @@
+.vit-wrap .vit-form {
+	max-width: 640px;
+	background: #fff;
+	padding: 16px 20px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.vit-summary-cards {
+	display: flex;
+	gap: 16px;
+	margin: 16px 0;
+	flex-wrap: wrap;
+}
+
+.vit-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 16px 20px;
+	min-width: 180px;
+}
+
+.vit-card-value {
+	display: block;
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.vit-card-label {
+	display: block;
+	color: #646970;
+	font-size: 13px;
+	margin-top: 4px;
+}
+
+.vit-filter-form {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 12px 0;
+}
+
+.vit-filter-form label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}

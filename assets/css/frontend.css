@@ -1,0 +1,31 @@
+.vit-frontend-form {
+	max-width: 480px;
+}
+
+.vit-frontend-form p {
+	margin-bottom: 14px;
+}
+
+.vit-frontend-form label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.vit-frontend-form input[type="text"],
+.vit-frontend-form input[type="email"],
+.vit-frontend-form input[type="number"],
+.vit-frontend-form input[type="date"],
+.vit-frontend-form select,
+.vit-frontend-form textarea {
+	width: 100%;
+	max-width: 400px;
+	padding: 8px;
+	box-sizing: border-box;
+}
+
+.vit-success {
+	background: #edfaef;
+	border-left: 4px solid #46b450;
+	padding: 10px 14px;
+}
