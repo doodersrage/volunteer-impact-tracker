@@ -107,9 +107,14 @@ class VIT_Settings {
 			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
 		}
 
+		$hourly = isset( $_POST['hourly_value'] ) ? (float) wp_unslash( $_POST['hourly_value'] ) : 0;
+		if ( $hourly < 0 ) {
+			$hourly = 0;
+		}
+
 		$settings = array(
 			'org_name'         => isset( $_POST['org_name'] ) ? sanitize_text_field( wp_unslash( $_POST['org_name'] ) ) : '',
-			'hourly_value'     => isset( $_POST['hourly_value'] ) ? (float) $_POST['hourly_value'] : 0,
+			'hourly_value'     => round( $hourly, 2 ),
 			'require_approval' => isset( $_POST['require_approval'] ) ? 1 : 0,
 			'certificate_text' => isset( $_POST['certificate_text'] ) ? sanitize_textarea_field( wp_unslash( $_POST['certificate_text'] ) ) : '',
 		);

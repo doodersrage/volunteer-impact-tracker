@@ -24,8 +24,29 @@
 	box-sizing: border-box;
 }
 
+.vit-frontend-form button[type="submit"] {
+	cursor: pointer;
+}
+
 .vit-success {
 	background: #edfaef;
 	border-left: 4px solid #46b450;
 	padding: 10px 14px;
+}
+
+.vit-error {
+	background: #fcf0f1;
+	border-left: 4px solid #d63638;
+	padding: 10px 14px;
+}
+
+.vit-pinned-opportunity {
+	margin-bottom: 14px;
+}
+
+.vit-hp {
+	position: absolute;
+	left: -9999px;
+	height: 0;
+	overflow: hidden;
 }

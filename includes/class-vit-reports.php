@@ -26,15 +26,20 @@ class VIT_Reports {
 	}
 
 	private static function get_filters() {
-		$start = isset( $_GET['vit_start'] ) ? sanitize_text_field( wp_unslash( $_GET['vit_start'] ) ) : gmdate( 'Y-01-01' );
-		$end   = isset( $_GET['vit_end'] ) ? sanitize_text_field( wp_unslash( $_GET['vit_end'] ) ) : gmdate( 'Y-m-d' );
+		$year_start = current_time( 'Y' ) . '-01-01';
+		$start      = isset( $_GET['vit_start'] ) ? vit_sanitize_date( wp_unslash( $_GET['vit_start'] ) ) : $year_start;
+		$end        = isset( $_GET['vit_end'] ) ? vit_sanitize_date( wp_unslash( $_GET['vit_end'] ) ) : vit_today();
 
-		// Basic sanity check on format; fall back to defaults if malformed.
-		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start ) ) {
-			$start = gmdate( 'Y-01-01' );
+		if ( '' === $start ) {
+			$start = $year_start;
 		}
-		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end ) ) {
-			$end = gmdate( 'Y-m-d' );
+		if ( '' === $end ) {
+			$end = vit_today();
+		}
+		if ( $start > $end ) {
+			$tmp   = $start;
+			$start = $end;
+			$end   = $tmp;
 		}
 
 		return array( $start, $end );
@@ -177,7 +182,9 @@ class VIT_Reports {
 								<td><?php echo esc_html( number_format_i18n( $v['hours'], 2 ) ); ?></td>
 								<td>
 									<?php if ( $v['email'] ) : ?>
-										<a class="button button-small" target="_blank" rel="noopener" href="<?php echo esc_url( VIT_Certificate::get_url( $v['email'], $start, $end ) ); ?>"><?php esc_html_e( 'View Certificate', 'volunteer-impact-tracker' ); ?></a>
+										<?php $cert_url = VIT_Certificate::get_url( $v['email'], $start, $end ); ?>
+										<a class="button button-small" target="_blank" rel="noopener" href="<?php echo esc_url( $cert_url ); ?>"><?php esc_html_e( 'View', 'volunteer-impact-tracker' ); ?></a>
+										<button type="button" class="button button-small vit-copy-link" data-url="<?php echo esc_attr( $cert_url ); ?>"><?php esc_html_e( 'Copy link', 'volunteer-impact-tracker' ); ?></button>
 									<?php else : ?>
 										<span class="description"><?php esc_html_e( 'Needs email', 'volunteer-impact-tracker' ); ?></span>
 									<?php endif; ?>
@@ -210,6 +217,27 @@ class VIT_Reports {
 				</tbody>
 			</table>
 		</div>
+		<script>
+		(function () {
+			document.querySelectorAll('.vit-copy-link').forEach(function (btn) {
+				btn.addEventListener('click', function () {
+					var url = btn.getAttribute('data-url') || '';
+					var done = function () {
+						var original = btn.textContent;
+						btn.textContent = <?php echo wp_json_encode( __( 'Copied!', 'volunteer-impact-tracker' ) ); ?>;
+						setTimeout(function () { btn.textContent = original; }, 1500);
+					};
+					if (navigator.clipboard && navigator.clipboard.writeText) {
+						navigator.clipboard.writeText(url).then(done).catch(function () {
+							window.prompt(<?php echo wp_json_encode( __( 'Copy this certificate link:', 'volunteer-impact-tracker' ) ); ?>, url);
+						});
+					} else {
+						window.prompt(<?php echo wp_json_encode( __( 'Copy this certificate link:', 'volunteer-impact-tracker' ) ); ?>, url);
+					}
+				});
+			});
+		})();
+		</script>
 		<?php
 	}
 

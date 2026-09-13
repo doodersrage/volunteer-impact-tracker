@@ -2,9 +2,9 @@
 Contributors: yourwordpressorg
 Tags: volunteer, nonprofit, hours tracking, certificate, reporting
 Requires at least: 6.0
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,6 +56,17 @@ The certificate link is signed (it can't be edited to show a different volunteer
 The front-end form works for both logged-in and logged-out visitors. If you want to restrict it to logged-in users only, wrap the shortcode in your theme/page with your own login check, or ask your site's developer to add one.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed certificate links that could break for emails with special characters (double URL-encoding).
+* Fixed admin-logged hours incorrectly storing the admin as the volunteer user ID.
+* Fixed "today" date defaults to use the site timezone instead of UTC.
+* Added server-side validation for hours (0.25–24), dates, and opportunity IDs.
+* Front-end form CSS now loads reliably when the shortcode is used outside classic post content.
+* Certificates with no matching hours show a clear message instead of a blank certificate.
+* Pending Approvals menu badge and admin notice when entries need review.
+* Status filter and color badges on Recent Entries; notes preview; opportunity dates in dropdowns.
+* Print button on certificates; Copy link on reports; clearer success/error messages for self-report.
 
 = 1.0.0 =
 * Initial release: opportunities, hour logging (admin + self-report), approval queue, reports, CSV export, printable certificates.

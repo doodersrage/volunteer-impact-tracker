@@ -19,9 +19,10 @@ class VIT_Certificate {
 	}
 
 	public static function get_url( $email, $start, $end ) {
-		$args = array(
+		$email = strtolower( trim( $email ) );
+		$args  = array(
 			'vit_certificate' => 1,
-			'email'           => rawurlencode( $email ),
+			'email'           => $email, // Let add_query_arg encode once — do not pre-encode.
 			'start'           => $start,
 			'end'             => $end,
 		);
@@ -39,9 +40,9 @@ class VIT_Certificate {
 			return;
 		}
 
-		$email = isset( $_GET['email'] ) ? sanitize_email( rawurldecode( wp_unslash( $_GET['email'] ) ) ) : '';
-		$start = isset( $_GET['start'] ) ? sanitize_text_field( wp_unslash( $_GET['start'] ) ) : '';
-		$end   = isset( $_GET['end'] ) ? sanitize_text_field( wp_unslash( $_GET['end'] ) ) : '';
+		$email = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
+		$start = isset( $_GET['start'] ) ? vit_sanitize_date( wp_unslash( $_GET['start'] ) ) : '';
+		$end   = isset( $_GET['end'] ) ? vit_sanitize_date( wp_unslash( $_GET['end'] ) ) : '';
 		$sig   = isset( $_GET['sig'] ) ? sanitize_text_field( wp_unslash( $_GET['sig'] ) ) : '';
 
 		if ( empty( $email ) || empty( $start ) || empty( $end ) || empty( $sig ) ) {
@@ -54,7 +55,7 @@ class VIT_Certificate {
 		global $wpdb;
 		$table = $wpdb->prefix . VIT_TABLE_HOURS;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$table} WHERE status = 'approved' AND volunteer_email = %s AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
@@ -71,17 +72,25 @@ class VIT_Certificate {
 			$name         = $row->volunteer_name;
 		}
 
+		if ( empty( $rows ) || $total_hours <= 0 ) {
+			wp_die(
+				esc_html__( 'No approved volunteer hours were found for this person in the selected date range.', 'volunteer-impact-tracker' ),
+				esc_html__( 'Certificate unavailable', 'volunteer-impact-tracker' ),
+				array( 'response' => 404 )
+			);
+		}
+
 		if ( empty( $name ) ) {
 			$name = $email;
 		}
 
-		$settings      = VIT_Settings::get();
-		$org_name      = $settings['org_name'];
-		$message       = $settings['certificate_text'];
-		$hourly_value  = (float) $settings['hourly_value'];
-		$dollar_value  = $total_hours * $hourly_value;
-		$date_range    = wp_date( get_option( 'date_format' ), strtotime( $start ) ) . ' – ' . wp_date( get_option( 'date_format' ), strtotime( $end ) );
-		$issued_date   = wp_date( get_option( 'date_format' ) );
+		$settings     = VIT_Settings::get();
+		$org_name     = $settings['org_name'];
+		$message      = $settings['certificate_text'];
+		$hourly_value = (float) $settings['hourly_value'];
+		$dollar_value = $total_hours * $hourly_value;
+		$date_range   = wp_date( get_option( 'date_format' ), strtotime( $start . ' 12:00:00' ) ) . ' – ' . wp_date( get_option( 'date_format' ), strtotime( $end . ' 12:00:00' ) );
+		$issued_date  = wp_date( get_option( 'date_format' ) );
 
 		nocache_headers();
 		?>
@@ -91,9 +100,12 @@ class VIT_Certificate {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<title><?php echo esc_html( sprintf( /* translators: %s volunteer name */ __( 'Certificate of Service — %s', 'volunteer-impact-tracker' ), $name ) ); ?></title>
-			<link rel="stylesheet" href="<?php echo esc_url( VIT_PLUGIN_URL . 'assets/css/certificate.css' ); ?>">
+			<link rel="stylesheet" href="<?php echo esc_url( VIT_PLUGIN_URL . 'assets/css/certificate.css?ver=' . rawurlencode( VIT_VERSION ) ); ?>">
 		</head>
 		<body>
+			<div class="vit-cert-toolbar no-print">
+				<button type="button" class="vit-print-btn" onclick="window.print();"><?php esc_html_e( 'Print / Save as PDF', 'volunteer-impact-tracker' ); ?></button>
+			</div>
 			<div class="vit-certificate">
 				<p class="vit-cert-eyebrow"><?php esc_html_e( 'Certificate of Service', 'volunteer-impact-tracker' ); ?></p>
 				<h1><?php echo esc_html( $org_name ); ?></h1>
@@ -101,11 +113,14 @@ class VIT_Certificate {
 				<p class="vit-cert-name"><?php echo esc_html( $name ); ?></p>
 				<p class="vit-cert-body">
 					<?php
-					printf(
-						/* translators: 1: total hours, 2: date range */
-						esc_html__( 'contributed %1$s hours of volunteer service between %2$s.', 'volunteer-impact-tracker' ),
-						'<strong>' . esc_html( number_format_i18n( $total_hours, 2 ) ) . '</strong>',
-						esc_html( $date_range )
+					echo wp_kses(
+						sprintf(
+							/* translators: 1: total hours (HTML), 2: date range */
+							__( 'contributed %1$s hours of volunteer service between %2$s.', 'volunteer-impact-tracker' ),
+							'<strong>' . esc_html( number_format_i18n( $total_hours, 2 ) ) . '</strong>',
+							esc_html( $date_range )
+						),
+						array( 'strong' => array() )
 					);
 					?>
 				</p>
@@ -115,8 +130,7 @@ class VIT_Certificate {
 				<p class="vit-cert-message"><?php echo esc_html( $message ); ?></p>
 				<p class="vit-cert-issued"><?php echo esc_html( sprintf( /* translators: %s date */ __( 'Issued %s', 'volunteer-impact-tracker' ), $issued_date ) ); ?></p>
 			</div>
-			<p class="vit-cert-print-hint no-print"><?php esc_html_e( 'Use your browser\'s Print option (and "Save as PDF" if you want a file) to save this certificate.', 'volunteer-impact-tracker' ); ?></p>
-			<script>window.onload = function() { /* Auto-print left off on purpose so the page is easy to screenshot too. */ };</script>
+			<p class="vit-cert-print-hint no-print"><?php esc_html_e( 'Use Print / Save as PDF above, or your browser\'s print dialog, to save this certificate.', 'volunteer-impact-tracker' ); ?></p>
 		</body>
 		</html>
 		<?php

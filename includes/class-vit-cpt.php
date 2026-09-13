@@ -91,7 +91,12 @@ class VIT_CPT {
 		}
 
 		if ( isset( $_POST['vit_date'] ) ) {
-			update_post_meta( $post_id, '_vit_date', sanitize_text_field( wp_unslash( $_POST['vit_date'] ) ) );
+			$date = vit_sanitize_date( wp_unslash( $_POST['vit_date'] ) );
+			if ( $date ) {
+				update_post_meta( $post_id, '_vit_date', $date );
+			} else {
+				delete_post_meta( $post_id, '_vit_date' );
+			}
 		}
 		if ( isset( $_POST['vit_location'] ) ) {
 			update_post_meta( $post_id, '_vit_location', sanitize_text_field( wp_unslash( $_POST['vit_location'] ) ) );
@@ -116,9 +121,11 @@ class VIT_CPT {
 
 	public static function column_content( $column, $post_id ) {
 		if ( 'vit_date' === $column ) {
-			echo esc_html( get_post_meta( $post_id, '_vit_date', true ) );
+			$date = get_post_meta( $post_id, '_vit_date', true );
+			echo $date ? esc_html( $date ) : '&mdash;';
 		} elseif ( 'vit_location' === $column ) {
-			echo esc_html( get_post_meta( $post_id, '_vit_location', true ) );
+			$location = get_post_meta( $post_id, '_vit_location', true );
+			echo $location ? esc_html( $location ) : '&mdash;';
 		} elseif ( 'vit_hours' === $column ) {
 			global $wpdb;
 			$table = $wpdb->prefix . VIT_TABLE_HOURS;

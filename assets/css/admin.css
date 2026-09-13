@@ -48,3 +48,31 @@
 	align-items: center;
 	gap: 6px;
 }
+
+.vit-status {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.vit-status-approved {
+	background: #edfaef;
+	color: #1e6e2f;
+}
+
+.vit-status-pending {
+	background: #fcf9e8;
+	color: #8a6d00;
+}
+
+.vit-status-rejected {
+	background: #fcf0f1;
+	color: #8a2424;
+}
+
+.vit-copy-link {
+	margin-left: 4px;
+}
