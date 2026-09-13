@@ -4,7 +4,7 @@ Tags: volunteer, nonprofit, hours tracking, certificate, reporting, in-kind
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,30 +16,32 @@ Most WordPress volunteer plugins stop at signup: a volunteer registers for a shi
 
 Volunteer Impact Tracker picks up where those plugins leave off:
 
-* **Opportunities** — a simple custom post type for volunteer opportunities/events (date, location, optional capacity).
-* **Log Hours** — admins can log hours directly (recorded as approved immediately), or volunteers can self-report through a front-end form (`[vit_log_hours]` shortcode).
-* **Approval queue** — self-reported hours land as pending until an admin approves or rejects them (this can be turned off in Settings if you trust your volunteers to self-certify). A menu badge and admin notice surface when entries are waiting.
-* **Reports** — total hours by volunteer and by opportunity, filterable by date range, with an estimated in-kind dollar value using an hourly rate you set.
-* **CSV export** — pull the filtered data straight into a grant application or board report.
-* **Printable certificates** — a signed, tamper-resistant link per volunteer showing their total hours in a date range, with a Print / Save as PDF button. Copy the link from Reports to send to the volunteer.
+* **Opportunities** — custom post type for volunteer opportunities/events (date, location, optional capacity).
+* **Log Hours** — admins can add, edit, search, and paginate entries; admin-logged hours are approved immediately.
+* **Self-report** — `[vit_log_hours]` front-end form; optional require-login setting.
+* **My hours** — `[vit_my_hours]` lets logged-in volunteers see their own entries and yearly totals.
+* **Approval queue** — pending queue with single and bulk approve/reject, menu badge, and admin notice.
+* **Email notifications** — optional alerts when hours need approval, when hours are approved, and certificate delivery from Reports.
+* **Reports** — date-range totals by volunteer and opportunity, in-kind dollar estimate, CSV export.
+* **Certificates** — signed printable links; view, copy, or email from Reports.
+* **Dashboard widget** — YTD hours, pending count, and top volunteers.
+* **Roles** — grant the Volunteers capability to Editor or other roles from Settings.
 
-This plugin is intentionally narrow. It doesn't try to replace your donation plugin, your event calendar, or your membership system — it does one thing that's currently missing: turning logged volunteer time into something you can report and hand back to the volunteer.
+This plugin is intentionally narrow. It doesn't replace donation, event, or membership plugins — it turns logged volunteer time into something you can report and hand back to the volunteer.
 
-= Shortcode =
+= Shortcodes =
 
-`[vit_log_hours]` — renders the self-report form anywhere.
+`[vit_log_hours]` — self-report form. Optional: `[vit_log_hours opportunity_id="123"]`.
 
-Optionally pin it to one opportunity:
-
-`[vit_log_hours opportunity_id="123"]`
+`[vit_my_hours]` — logged-in volunteer's hours for the current year. Optional: `[vit_my_hours year="2025"]`.
 
 = Admin screens =
 
-* **Volunteers → Log Hours** — log approved hours and browse recent entries (filter by status).
-* **Volunteers → Pending Approvals** — approve or reject self-reported time.
-* **Volunteers → Opportunities** — manage opportunities volunteers can log against.
-* **Volunteers → Reports** — date-range totals, in-kind estimate, CSV export, certificates.
-* **Volunteers → Settings** — organization name, hourly value, certificate message, approval toggle.
+* **Volunteers → Log Hours** — add/edit hours; search and filter entries.
+* **Volunteers → Pending Approvals** — approve or reject (including bulk).
+* **Volunteers → Opportunities** — manage opportunities.
+* **Volunteers → Reports** — totals, CSV, certificates.
+* **Volunteers → Settings** — org name, hourly value, workflow, emails, manager roles.
 
 = A note on the dollar-value estimate =
 
@@ -49,23 +51,23 @@ The default per-hour value in Settings is a placeholder. Independent Sector publ
 
 1. Download or clone this repository into `/wp-content/plugins/volunteer-impact-tracker/`, or zip the folder and upload it via Plugins → Add New → Upload Plugin.
 2. Activate **Volunteer Impact Tracker**.
-3. Go to **Volunteers → Settings** and set your organization name and hourly value.
+3. Go to **Volunteers → Settings** and set your organization name, hourly value, and preferred workflow options.
 4. Add opportunities under **Volunteers → Opportunities** (optional — hours can also be logged as "General").
-5. Add the `[vit_log_hours]` shortcode to a page if you want volunteers to self-report hours.
+5. Add `[vit_log_hours]` and/or `[vit_my_hours]` to pages as needed.
 
 == Frequently Asked Questions ==
 
 = Does this replace my volunteer signup plugin? =
 
-No — it's meant to sit alongside one. Signup plugins (like Wired Impact Volunteer Management or Volunteer Sign-Up Sheets) handle getting people to a shift. This plugin handles what happened after: hours served, approvals, and reporting.
+No — it's meant to sit alongside one. Signup plugins handle getting people to a shift. This plugin handles hours served, approvals, and reporting.
 
 = Who can see the certificate link? =
 
-The certificate link is signed (it can't be edited to show a different volunteer or date range without invalidating it), but it doesn't require login — anyone with the exact link can view it, the same way a printed certificate works. Don't post certificate links publicly; hand them directly to the volunteer they belong to.
+The link is signed so parameters can't be silently altered, but it does not require login. Share it privately with the volunteer it belongs to.
 
 = Why does a certificate say "Needs email"? =
 
-Certificates are looked up by volunteer email. If an admin logs hours without an email, Reports will show "Needs email" instead of a certificate link. Add an email on future entries (or edit/re-log) to enable certificates.
+Certificates are looked up by volunteer email. Include an email when logging hours to enable certificates and approval/certificate emails.
 
 = How many hours can someone log per entry? =
 
@@ -73,29 +75,37 @@ Each entry must be between **0.25 and 24** hours, and the date served cannot be 
 
 = Can I require login to submit hours? =
 
-The front-end form works for both logged-in and logged-out visitors. If you want to restrict it to logged-in users only, wrap the shortcode in your theme/page with your own login check, or ask your site's developer to add one.
+Yes — enable **Require Login** under Volunteers → Settings.
+
+= Who can manage the Volunteers screens? =
+
+Administrators always can. Under Settings you can also grant access to other roles (for example Editor).
 
 = What happens when I delete the plugin? =
 
-On uninstall, the custom hours table and plugin settings are removed. Opportunity posts are left in place as ordinary WordPress content.
+The custom hours table and plugin settings are removed. Opportunity posts are left in place.
 
 == Changelog ==
 
+= 1.1.0 =
+* Edit existing hour entries (including status).
+* Search and pagination on the entries list.
+* Bulk approve/reject on Pending Approvals.
+* Require Login setting for the self-report form.
+* New `[vit_my_hours]` shortcode for logged-in volunteers.
+* Email notifications for pending submissions and approved hours.
+* Email certificate from Reports.
+* Dashboard widget with YTD hours, pending count, and top volunteers.
+* Assign Volunteers capability to additional roles from Settings.
+
 = 1.0.1 =
-* Fixed certificate links that could break for emails with special characters (double URL-encoding).
-* Fixed admin-logged hours incorrectly storing the admin as the volunteer user ID.
-* Fixed "today" date defaults to use the site timezone instead of UTC.
-* Added server-side validation for hours (0.25–24), dates, and opportunity IDs.
-* Front-end form CSS now loads reliably when the shortcode is used outside classic post content.
-* Certificates with no matching hours show a clear message instead of a blank certificate.
-* Pending Approvals menu badge and admin notice when entries need review.
-* Status filter and color badges on Recent Entries; notes preview; opportunity dates in dropdowns.
-* Print button on certificates; Copy link on reports; clearer success/error messages for self-report.
+* Fixed certificate links, admin user ID storage, and timezone date defaults.
+* Stronger validation; pending badges; print/copy certificate QoL.
 
 = 1.0.0 =
-* Initial release: opportunities, hour logging (admin + self-report), approval queue, reports, CSV export, printable certificates.
+* Initial release: opportunities, hour logging, approval queue, reports, CSV export, printable certificates.
 
 == Upgrade Notice ==
 
-= 1.0.1 =
-Recommended update: fixes certificate links and date/timezone handling, plus pending-approval badges and stronger validation.
+= 1.1.0 =
+Adds edit/search/pagination, bulk approvals, emails, my-hours shortcode, dashboard widget, and role assignment.

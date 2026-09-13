@@ -2,7 +2,7 @@
 
 WordPress plugin for nonprofits to **log volunteer hours**, approve self-reports, export grant-ready reports, and issue printable certificates of service.
 
-[View on GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
+**Current version:** 1.1.0 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
 
 ## Why it exists
 
@@ -15,11 +15,14 @@ It is intentionally narrow — not a donation, events, or membership system.
 | Area | What you get |
 | --- | --- |
 | Opportunities | CPT with date, location, optional capacity |
-| Log hours | Admin logging (auto-approved) + front-end self-report |
-| Approvals | Pending queue with menu badge and admin notice (optional) |
-| Reports | Date-range totals by volunteer / opportunity + in-kind value |
-| Export | CSV for the current filter |
-| Certificates | Signed links, print / save as PDF, copy link from Reports |
+| Log hours | Admin add/edit, search, pagination; front-end self-report |
+| My hours | `[vit_my_hours]` for logged-in volunteers |
+| Approvals | Pending queue, bulk actions, menu badge, admin notice |
+| Email | Pending alert, optional approval notice, send certificate |
+| Reports | Date-range totals, in-kind value, CSV export |
+| Certificates | Signed links — view, copy, or email |
+| Dashboard | YTD hours, pending count, top volunteers |
+| Access | Grant capability to additional roles from Settings |
 
 ## Requirements
 
@@ -30,9 +33,9 @@ It is intentionally narrow — not a donation, events, or membership system.
 
 1. Copy this folder to `wp-content/plugins/volunteer-impact-tracker/`, **or** zip it and upload via **Plugins → Add New → Upload Plugin**.
 2. Activate **Volunteer Impact Tracker**.
-3. Open **Volunteers → Settings** and set organization name + hourly value.
+3. Open **Volunteers → Settings** (org name, hourly rate, workflow, emails, roles).
 4. (Optional) Add opportunities under **Volunteers → Opportunities**.
-5. (Optional) Put `[vit_log_hours]` on a page for volunteer self-reporting.
+5. Add shortcodes to pages as needed.
 
 ### From git
 
@@ -43,29 +46,26 @@ git clone https://github.com/doodersrage/volunteer-impact-tracker.git
 
 Then activate in **Plugins**.
 
-## Shortcode
+## Shortcodes
 
 ```
 [vit_log_hours]
-```
-
-Pin to one opportunity:
-
-```
 [vit_log_hours opportunity_id="123"]
+[vit_my_hours]
+[vit_my_hours year="2025"]
 ```
 
 ## Admin menu
 
-- **Log Hours** — enter approved hours; filter recent entries by status  
-- **Pending Approvals** — approve / reject self-reports  
-- **Opportunities** — manage events volunteers log against  
+- **Log Hours** — add/edit; search and filter entries  
+- **Pending Approvals** — approve / reject (including bulk)  
+- **Opportunities** — events volunteers log against  
 - **Reports** — filters, totals, CSV, certificates  
-- **Settings** — org name, hourly rate, certificate text, require-approval toggle  
+- **Settings** — org, rate, approval/login, emails, manager roles  
 
 ## Certificates
 
-From **Reports**, use **View** or **Copy link** for a volunteer (email required). Links are signed so parameters can’t be silently altered; anyone with the exact URL can open it — treat them like a paper certificate and share privately.
+From **Reports**, use **View**, **Copy link**, or **Email**. Links are signed; anyone with the exact URL can open them — share privately.
 
 ## Hour limits
 
@@ -74,7 +74,7 @@ From **Reports**, use **View** or **Copy link** for a volunteer (email required)
 
 ## In-kind dollar value
 
-The Settings hourly rate is a placeholder. Update it annually using a current published estimate (e.g. Independent Sector) before putting the figure in a grant or board report.
+Update the Settings hourly rate annually using a current published estimate before putting the figure in a grant or board report.
 
 ## Uninstall
 
@@ -82,11 +82,15 @@ Deleting the plugin removes the hours table and settings. Opportunity posts are 
 
 ## Changelog
 
-See [`readme.txt`](readme.txt) (WordPress.org-style changelog), or the [releases / commits](https://github.com/doodersrage/volunteer-impact-tracker) on GitHub.
+See [`readme.txt`](readme.txt) for the full WordPress.org-style changelog.
+
+### 1.1.0
+
+Edit/search/pagination, bulk approvals, emails, `[vit_my_hours]`, dashboard widget, role assignment, require-login setting.
 
 ### 1.0.1
 
-Bug fixes for certificate URLs, admin user IDs, and timezone dates; stronger validation; pending badges; print/copy QoL.
+Certificate URL / timezone / validation fixes and admin QoL.
 
 ### 1.0.0
 

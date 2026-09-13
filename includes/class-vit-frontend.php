@@ -4,32 +4,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Front-end self-report form: [vit_log_hours]
- * Submissions land as "pending" (or "approved" automatically if the
- * "Require Approval" setting is turned off).
+ * Front-end shortcodes: [vit_log_hours] and [vit_my_hours].
  */
 class VIT_Frontend {
 
 	public static function init() {
-		add_shortcode( 'vit_log_hours', array( __CLASS__, 'render_shortcode' ) );
+		add_shortcode( 'vit_log_hours', array( __CLASS__, 'render_log_hours' ) );
+		add_shortcode( 'vit_my_hours', array( __CLASS__, 'render_my_hours' ) );
 		add_action( 'admin_post_vit_frontend_log_hours', array( __CLASS__, 'handle_submit' ) );
 		add_action( 'admin_post_nopriv_vit_frontend_log_hours', array( __CLASS__, 'handle_submit' ) );
 	}
 
-	/**
-	 * Enqueue front-end styles when the shortcode actually renders
-	 * (works for classic content, widgets, and block themes).
-	 */
 	private static function enqueue_styles() {
 		wp_enqueue_style( 'vit-frontend', VIT_PLUGIN_URL . 'assets/css/frontend.css', array(), VIT_VERSION );
 	}
 
-	public static function render_shortcode( $atts ) {
+	public static function render_log_hours( $atts ) {
 		self::enqueue_styles();
+
+		if ( (int) VIT_Settings::get( 'require_login', 0 ) && ! is_user_logged_in() ) {
+			$login_url = wp_login_url( get_permalink() );
+			ob_start();
+			echo '<p class="vit-login-required">';
+			printf(
+				/* translators: %s: login URL */
+				wp_kses_post( __( 'Please <a href="%s">log in</a> to submit volunteer hours.', 'volunteer-impact-tracker' ) ),
+				esc_url( $login_url )
+			);
+			echo '</p>';
+			return ob_get_clean();
+		}
 
 		$atts = shortcode_atts(
 			array(
-				'opportunity_id' => '', // Optional: pin the form to one opportunity.
+				'opportunity_id' => '',
 			),
 			$atts,
 			'vit_log_hours'
@@ -113,9 +121,6 @@ class VIT_Frontend {
 				<textarea id="vit_notes" name="notes" rows="2"></textarea>
 			</p>
 
-			<?php
-			// Honeypot field against basic spam bots.
-			?>
 			<p class="vit-hp" aria-hidden="true">
 				<label for="vit_website">Website</label>
 				<input type="text" id="vit_website" name="vit_website" tabindex="-1" autocomplete="off">
@@ -127,13 +132,119 @@ class VIT_Frontend {
 		return ob_get_clean();
 	}
 
+	/**
+	 * [vit_my_hours] — logged-in volunteer's own entries and totals.
+	 */
+	public static function render_my_hours( $atts ) {
+		self::enqueue_styles();
+
+		if ( ! is_user_logged_in() ) {
+			$login_url = wp_login_url( get_permalink() );
+			ob_start();
+			echo '<p class="vit-login-required">';
+			printf(
+				wp_kses_post( __( 'Please <a href="%s">log in</a> to view your volunteer hours.', 'volunteer-impact-tracker' ) ),
+				esc_url( $login_url )
+			);
+			echo '</p>';
+			return ob_get_clean();
+		}
+
+		$atts = shortcode_atts(
+			array(
+				'year' => current_time( 'Y' ),
+			),
+			$atts,
+			'vit_my_hours'
+		);
+
+		$user  = wp_get_current_user();
+		$year  = absint( $atts['year'] );
+		if ( $year < 2000 || $year > 2100 ) {
+			$year = (int) current_time( 'Y' );
+		}
+		$start = $year . '-01-01';
+		$end   = $year . '-12-31';
+
+		global $wpdb;
+		$table = vit_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$entries = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table}
+				WHERE date_served BETWEEN %s AND %s
+				AND (user_id = %d OR volunteer_email = %s)
+				ORDER BY date_served DESC, id DESC",
+				$start,
+				$end,
+				$user->ID,
+				$user->user_email
+			)
+		);
+
+		$approved_hours = 0;
+		$pending_hours  = 0;
+		foreach ( $entries as $entry ) {
+			if ( 'approved' === $entry->status ) {
+				$approved_hours += (float) $entry->hours;
+			} elseif ( 'pending' === $entry->status ) {
+				$pending_hours += (float) $entry->hours;
+			}
+		}
+
+		ob_start();
+		?>
+		<div class="vit-my-hours">
+			<h3><?php echo esc_html( sprintf( /* translators: %d: year */ __( 'Your hours in %d', 'volunteer-impact-tracker' ), $year ) ); ?></h3>
+			<p class="vit-my-hours-summary">
+				<strong><?php echo esc_html( number_format_i18n( $approved_hours, 2 ) ); ?></strong>
+				<?php esc_html_e( 'approved', 'volunteer-impact-tracker' ); ?>
+				<?php if ( $pending_hours > 0 ) : ?>
+					· <strong><?php echo esc_html( number_format_i18n( $pending_hours, 2 ) ); ?></strong>
+					<?php esc_html_e( 'pending', 'volunteer-impact-tracker' ); ?>
+				<?php endif; ?>
+			</p>
+
+			<?php if ( empty( $entries ) ) : ?>
+				<p><?php esc_html_e( 'No hours found for this year yet.', 'volunteer-impact-tracker' ); ?></p>
+			<?php else : ?>
+				<table class="vit-my-hours-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Date', 'volunteer-impact-tracker' ); ?></th>
+							<th><?php esc_html_e( 'Opportunity', 'volunteer-impact-tracker' ); ?></th>
+							<th><?php esc_html_e( 'Hours', 'volunteer-impact-tracker' ); ?></th>
+							<th><?php esc_html_e( 'Status', 'volunteer-impact-tracker' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $entries as $entry ) : ?>
+							<tr>
+								<td><?php echo esc_html( $entry->date_served ); ?></td>
+								<td><?php echo $entry->opportunity_id ? esc_html( get_the_title( $entry->opportunity_id ) ) : esc_html__( 'General', 'volunteer-impact-tracker' ); ?></td>
+								<td><?php echo esc_html( number_format_i18n( (float) $entry->hours, 2 ) ); ?></td>
+								<td><span class="vit-status vit-status-<?php echo esc_attr( $entry->status ); ?>"><?php echo esc_html( ucfirst( $entry->status ) ); ?></span></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
 	public static function handle_submit() {
 		if ( ! isset( $_POST['vit_frontend_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['vit_frontend_nonce'] ) ), 'vit_frontend_log_hours' ) ) {
 			wp_die( esc_html__( 'Security check failed. Please go back and try again.', 'volunteer-impact-tracker' ) );
 		}
 
-		// Honeypot: if filled in, silently pretend success and bail.
+		if ( (int) VIT_Settings::get( 'require_login', 0 ) && ! is_user_logged_in() ) {
+			wp_die( esc_html__( 'You must be logged in to submit hours.', 'volunteer-impact-tracker' ) );
+		}
+
 		if ( ! empty( $_POST['vit_website'] ) ) {
 			self::redirect_back( 'approved' );
 		}
@@ -153,13 +264,12 @@ class VIT_Frontend {
 		}
 
 		global $wpdb;
-		$table            = $wpdb->prefix . VIT_TABLE_HOURS;
 		$require_approval = (int) VIT_Settings::get( 'require_approval', 1 );
 		$status           = $require_approval ? 'pending' : 'approved';
 		$user_id          = get_current_user_id();
 
 		$wpdb->insert(
-			$table,
+			vit_table(),
 			array(
 				'opportunity_id'  => $opportunity_id ? $opportunity_id : null,
 				'user_id'         => $user_id ? $user_id : null,
@@ -175,13 +285,17 @@ class VIT_Frontend {
 			)
 		);
 
+		$entry_id = (int) $wpdb->insert_id;
+		if ( $entry_id && 'pending' === $status ) {
+			$entry = vit_get_entry( $entry_id );
+			if ( $entry ) {
+				VIT_Emails::notify_pending( $entry );
+			}
+		}
+
 		self::redirect_back( $status );
 	}
 
-	/**
-	 * @param string $mode  approved|pending|empty.
-	 * @param bool   $error Redirect with error flag.
-	 */
 	private static function redirect_back( $mode = '', $error = false ) {
 		$redirect = isset( $_POST['vit_redirect'] ) ? esc_url_raw( wp_unslash( $_POST['vit_redirect'] ) ) : home_url( '/' );
 		$args     = array();

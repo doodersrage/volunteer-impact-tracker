@@ -3,7 +3,7 @@
  * Plugin Name:       Volunteer Impact Tracker
  * Plugin URI:         https://github.com/doodersrage/volunteer-impact-tracker
  * Description:        Log volunteer hours against opportunities, approve self-reported time, and generate reports and printable certificates for grant applications and board reporting.
- * Version:            1.0.1
+ * Version:            1.1.0
  * Requires at least:  6.0
  * Requires PHP:       7.4
  * Author:             Your Organization
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'VIT_VERSION', '1.0.1' );
+define( 'VIT_VERSION', '1.1.0' );
 define( 'VIT_PLUGIN_FILE', __FILE__ );
 define( 'VIT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VIT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -24,14 +24,17 @@ define( 'VIT_TABLE_HOURS', 'vit_hours' );
 define( 'VIT_CPT_OPPORTUNITY', 'vit_opportunity' );
 define( 'VIT_CAPABILITY', 'manage_vit_volunteers' );
 define( 'VIT_MAX_HOURS_PER_ENTRY', 24 );
+define( 'VIT_ENTRIES_PER_PAGE', 20 );
 
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-activator.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-cpt.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-settings.php';
+require_once VIT_PLUGIN_DIR . 'includes/class-vit-emails.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-admin.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-frontend.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-reports.php';
 require_once VIT_PLUGIN_DIR . 'includes/class-vit-certificate.php';
+require_once VIT_PLUGIN_DIR . 'includes/class-vit-dashboard.php';
 
 register_activation_hook( __FILE__, array( 'VIT_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'VIT_Activator', 'deactivate' ) );
@@ -44,24 +47,22 @@ function vit_init() {
 
 	VIT_CPT::init();
 	VIT_Settings::init();
+	VIT_Emails::init();
 	VIT_Admin::init();
 	VIT_Frontend::init();
 	VIT_Reports::init();
 	VIT_Certificate::init();
+	VIT_Dashboard::init();
 }
 add_action( 'plugins_loaded', 'vit_init' );
 
 /**
- * Give administrators the plugin capability by default on activation,
- * and make sure it stays attached to the administrator role going forward.
+ * Keep the capability on roles configured in Settings (administrator always).
  */
-function vit_grant_admin_capability() {
-	$role = get_role( 'administrator' );
-	if ( $role && ! $role->has_cap( VIT_CAPABILITY ) ) {
-		$role->add_cap( VIT_CAPABILITY );
-	}
+function vit_sync_capabilities() {
+	VIT_Settings::sync_capabilities();
 }
-add_action( 'admin_init', 'vit_grant_admin_capability' );
+add_action( 'admin_init', 'vit_sync_capabilities' );
 
 /**
  * Today's date in the site timezone (Y-m-d).
@@ -117,6 +118,20 @@ function vit_pending_count() {
 }
 
 /**
+ * Fetch a single hours entry by ID.
+ *
+ * @param int $id Entry ID.
+ * @return object|null
+ */
+function vit_get_entry( $id ) {
+	global $wpdb;
+	$table = $wpdb->prefix . VIT_TABLE_HOURS;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", absint( $id ) ) );
+	return $row ? $row : null;
+}
+
+/**
  * Format an opportunity option label (title + optional date).
  *
  * @param WP_Post $post Opportunity post.
@@ -128,4 +143,14 @@ function vit_opportunity_label( $post ) {
 		return sprintf( '%s (%s)', $post->post_title, $date );
 	}
 	return $post->post_title;
+}
+
+/**
+ * Hours table name with prefix.
+ *
+ * @return string
+ */
+function vit_table() {
+	global $wpdb;
+	return $wpdb->prefix . VIT_TABLE_HOURS;
 }

@@ -42,21 +42,15 @@ class VIT_Activator {
 
 		// Register CPT before flushing rewrite rules.
 		require_once VIT_PLUGIN_DIR . 'includes/class-vit-cpt.php';
+		require_once VIT_PLUGIN_DIR . 'includes/class-vit-settings.php';
 		VIT_CPT::register_post_type();
 		flush_rewrite_rules();
 
-		// Sensible defaults for settings, only set once.
 		if ( false === get_option( 'vit_settings' ) ) {
-			add_option(
-				'vit_settings',
-				array(
-					'org_name'          => get_bloginfo( 'name' ),
-					'hourly_value'      => 33.49, // Editable in Settings; update to your current benchmark rate.
-					'certificate_text'  => __( 'In recognition of your generous service and dedication.', 'volunteer-impact-tracker' ),
-					'require_approval'  => 1,
-				)
-			);
+			add_option( 'vit_settings', VIT_Settings::defaults() );
 		}
+
+		VIT_Settings::sync_capabilities();
 	}
 
 	public static function deactivate() {

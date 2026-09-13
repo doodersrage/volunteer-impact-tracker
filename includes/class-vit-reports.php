@@ -4,14 +4,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Reports screen: totals by volunteer and by opportunity, date-range filter,
- * dollar-value estimate, and CSV export for grant applications / board reports.
+ * Reports screen: totals, CSV export, certificates (view / copy / email).
  */
 class VIT_Reports {
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu' ) );
 		add_action( 'admin_post_vit_export_csv', array( __CLASS__, 'export_csv' ) );
+		add_action( 'admin_post_vit_email_certificate', array( __CLASS__, 'email_certificate' ) );
 	}
 
 	public static function add_menu() {
@@ -47,9 +47,9 @@ class VIT_Reports {
 
 	private static function query_rows( $start, $end ) {
 		global $wpdb;
-		$table = $wpdb->prefix . VIT_TABLE_HOURS;
+		$table = vit_table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$table} WHERE status = 'approved' AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
@@ -68,9 +68,16 @@ class VIT_Reports {
 		$rows                = self::query_rows( $start, $end );
 		$hourly_value        = (float) VIT_Settings::get( 'hourly_value', 33.49 );
 
-		$total_hours      = 0;
-		$by_volunteer      = array();
-		$by_opportunity    = array();
+		if ( isset( $_GET['cert_sent'] ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Certificate email sent.', 'volunteer-impact-tracker' ) . '</p></div>';
+		}
+		if ( isset( $_GET['cert_error'] ) ) {
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Could not send certificate email.', 'volunteer-impact-tracker' ) . '</p></div>';
+		}
+
+		$total_hours   = 0;
+		$by_volunteer  = array();
+		$by_opportunity = array();
 
 		foreach ( $rows as $row ) {
 			$total_hours += (float) $row->hours;
@@ -182,9 +189,25 @@ class VIT_Reports {
 								<td><?php echo esc_html( number_format_i18n( $v['hours'], 2 ) ); ?></td>
 								<td>
 									<?php if ( $v['email'] ) : ?>
-										<?php $cert_url = VIT_Certificate::get_url( $v['email'], $start, $end ); ?>
+										<?php
+										$cert_url  = VIT_Certificate::get_url( $v['email'], $start, $end );
+										$email_url = wp_nonce_url(
+											add_query_arg(
+												array(
+													'action' => 'vit_email_certificate',
+													'email'  => $v['email'],
+													'name'   => $v['name'],
+													'vit_start' => $start,
+													'vit_end'   => $end,
+												),
+												admin_url( 'admin-post.php' )
+											),
+											'vit_email_certificate_' . $v['email']
+										);
+										?>
 										<a class="button button-small" target="_blank" rel="noopener" href="<?php echo esc_url( $cert_url ); ?>"><?php esc_html_e( 'View', 'volunteer-impact-tracker' ); ?></a>
 										<button type="button" class="button button-small vit-copy-link" data-url="<?php echo esc_attr( $cert_url ); ?>"><?php esc_html_e( 'Copy link', 'volunteer-impact-tracker' ); ?></button>
+										<a class="button button-small" href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Email', 'volunteer-impact-tracker' ); ?></a>
 									<?php else : ?>
 										<span class="description"><?php esc_html_e( 'Needs email', 'volunteer-impact-tracker' ); ?></span>
 									<?php endif; ?>
@@ -239,6 +262,36 @@ class VIT_Reports {
 		})();
 		</script>
 		<?php
+	}
+
+	public static function email_certificate() {
+		if ( ! current_user_can( VIT_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'volunteer-impact-tracker' ) );
+		}
+
+		$email = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
+		$name  = isset( $_GET['name'] ) ? sanitize_text_field( wp_unslash( $_GET['name'] ) ) : '';
+		if ( ! $email || ! isset( $_GET['_wpnonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'vit_email_certificate_' . $email ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
+		}
+
+		list( $start, $end ) = self::get_filters();
+		$ok = VIT_Emails::send_certificate( $email, $name, $start, $end );
+
+		$args = array(
+			'page'      => 'vit-reports',
+			'vit_start' => $start,
+			'vit_end'   => $end,
+		);
+		if ( $ok ) {
+			$args['cert_sent'] = '1';
+		} else {
+			$args['cert_error'] = '1';
+		}
+
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	public static function export_csv() {

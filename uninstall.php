@@ -18,7 +18,11 @@ $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 delete_option( 'vit_settings' );
 delete_option( 'vit_db_version' );
 
-$role = get_role( 'administrator' );
-if ( $role ) {
-	$role->remove_cap( 'manage_vit_volunteers' );
+if ( function_exists( 'wp_roles' ) ) {
+	foreach ( array_keys( wp_roles()->roles ) as $slug ) {
+		$role = get_role( $slug );
+		if ( $role ) {
+			$role->remove_cap( 'manage_vit_volunteers' );
+		}
+	}
 }

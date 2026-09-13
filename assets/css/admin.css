@@ -76,3 +76,21 @@
 .vit-copy-link {
 	margin-left: 4px;
 }
+
+.vit-bulk-bar {
+	margin: 12px 0;
+	display: flex;
+	gap: 8px;
+}
+
+.vit-pagination {
+	margin-top: 12px;
+}
+
+.vit-pagination .button {
+	margin-right: 4px;
+}
+
+.vit-dash-top {
+	margin: 0 0 12px 1.2em;
+}

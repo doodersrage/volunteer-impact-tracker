@@ -50,3 +50,51 @@
 	height: 0;
 	overflow: hidden;
 }
+
+.vit-login-required a {
+	font-weight: 600;
+}
+
+.vit-my-hours-summary {
+	margin-bottom: 16px;
+}
+
+.vit-my-hours-table {
+	width: 100%;
+	max-width: 640px;
+	border-collapse: collapse;
+}
+
+.vit-my-hours-table th,
+.vit-my-hours-table td {
+	text-align: left;
+	padding: 8px 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.vit-my-hours-table th {
+	font-size: 13px;
+}
+
+.vit-status {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.vit-status-approved {
+	background: #edfaef;
+	color: #1e6e2f;
+}
+
+.vit-status-pending {
+	background: #fcf9e8;
+	color: #8a6d00;
+}
+
+.vit-status-rejected {
+	background: #fcf0f1;
+	color: #8a2424;
+}
