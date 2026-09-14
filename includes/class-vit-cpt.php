@@ -91,7 +91,7 @@ class VIT_CPT {
 		}
 
 		if ( isset( $_POST['vit_date'] ) ) {
-			$date = vit_sanitize_date( wp_unslash( $_POST['vit_date'] ) );
+			$date = vit_sanitize_date( sanitize_text_field( wp_unslash( $_POST['vit_date'] ) ) );
 			if ( $date ) {
 				update_post_meta( $post_id, '_vit_date', $date );
 			} else {
@@ -128,10 +128,11 @@ class VIT_CPT {
 			echo $location ? esc_html( $location ) : '&mdash;';
 		} elseif ( 'vit_hours' === $column ) {
 			global $wpdb;
-			$table = $wpdb->prefix . VIT_TABLE_HOURS;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 			$total = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT SUM(hours) FROM {$table} WHERE opportunity_id = %d AND status = 'approved'",
+					"SELECT SUM(hours) FROM %i WHERE opportunity_id = %d AND status = 'approved'",
+					$wpdb->prefix . VIT_TABLE_HOURS,
 					$post_id
 				)
 			);

@@ -30,4 +30,4 @@ svn add assets/*
 svn ci -m "Add directory icons and banners"
 ```
 
-See [WORDPRESS-ORG.md](../WORDPRESS-ORG.md) for the full submission checklist.
+See [SUBMISSION.md](SUBMISSION.md) for the full submission checklist.

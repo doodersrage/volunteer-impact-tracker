@@ -114,13 +114,16 @@ class VIT_Admin {
 	/**
 	 * Parse shared entry fields from POST; return WP_Error or data array.
 	 *
+	 * Callers must verify the request nonce before calling this method.
+	 *
 	 * @return array|WP_Error
 	 */
 	private static function parse_entry_post() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Callers verify nonce before invoking.
 		$name  = isset( $_POST['volunteer_name'] ) ? sanitize_text_field( wp_unslash( $_POST['volunteer_name'] ) ) : '';
 		$email = isset( $_POST['volunteer_email'] ) ? sanitize_email( wp_unslash( $_POST['volunteer_email'] ) ) : '';
-		$hours = isset( $_POST['hours'] ) ? vit_sanitize_hours( wp_unslash( $_POST['hours'] ) ) : 0;
-		$date  = isset( $_POST['date_served'] ) ? vit_sanitize_date( wp_unslash( $_POST['date_served'] ) ) : '';
+		$hours = isset( $_POST['hours'] ) ? vit_sanitize_hours( sanitize_text_field( wp_unslash( $_POST['hours'] ) ) ) : 0;
+		$date  = isset( $_POST['date_served'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_POST['date_served'] ) ) ) : '';
 
 		if ( '' === $name || $hours <= 0 || '' === $date || $date > vit_today() ) {
 			return new WP_Error( 'invalid', __( 'Invalid entry data.', 'volunteer-impact-tracker' ) );
@@ -136,7 +139,7 @@ class VIT_Admin {
 			$status = 'approved';
 		}
 
-		return array(
+		$data = array(
 			'opportunity_id'  => $opportunity_id ? $opportunity_id : null,
 			'volunteer_name'  => $name,
 			'volunteer_email' => $email,
@@ -145,6 +148,9 @@ class VIT_Admin {
 			'notes'           => isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '',
 			'status'          => $status,
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		return $data;
 	}
 
 	/** ---------- Log Hours screen ---------- */
@@ -154,67 +160,126 @@ class VIT_Admin {
 			return;
 		}
 		global $wpdb;
-		$table = vit_table();
+		$table = $wpdb->prefix . VIT_TABLE_HOURS;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['added'] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Hours logged and approved.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['updated'] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Entry updated.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['deleted'] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Entry deleted.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['error'] ) ) {
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Could not save entry. Check that name, hours (0.25–24), and date are valid.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
 
 		$opportunities = self::get_opportunities();
-		$edit_id       = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
-		$edit_entry    = $edit_id ? vit_get_entry( $edit_id ) : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
+		$edit_id    = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
+		$edit_entry = $edit_id ? vit_get_entry( $edit_id ) : null;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter query arg; capability checked above.
 		$status_filter = isset( $_GET['vit_status'] ) ? sanitize_key( wp_unslash( $_GET['vit_status'] ) ) : '';
 		$allowed       = array( 'approved', 'pending', 'rejected' );
 		if ( ! in_array( $status_filter, $allowed, true ) ) {
 			$status_filter = '';
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter query arg; capability checked above.
 		$search = isset( $_GET['vit_s'] ) ? sanitize_text_field( wp_unslash( $_GET['vit_s'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter query arg; capability checked above.
 		$page   = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 );
 		$offset = ( $page - 1 ) * VIT_ENTRIES_PER_PAGE;
 
-		$where  = array( '1=1' );
-		$params = array();
-		if ( $status_filter ) {
-			$where[]  = 'status = %s';
-			$params[] = $status_filter;
-		}
-		if ( '' !== $search ) {
-			$like     = '%' . $wpdb->esc_like( $search ) . '%';
-			$where[]  = '(volunteer_name LIKE %s OR volunteer_email LIKE %s OR notes LIKE %s)';
-			$params[] = $like;
-			$params[] = $like;
-			$params[] = $like;
-		}
-		$where_sql = implode( ' AND ', $where );
+		$has_status = ( '' !== $status_filter );
+		$has_search = ( '' !== $search );
+		$like       = $has_search ? '%' . $wpdb->esc_like( $search ) . '%' : '';
 
-		if ( ! empty( $params ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
-			$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", ...$params ) );
-			$query_params = array_merge( $params, array( VIT_ENTRIES_PER_PAGE, $offset ) );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+		if ( $has_status && $has_search ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i WHERE status = %s AND (volunteer_name LIKE %s OR volunteer_email LIKE %s OR notes LIKE %s)',
+					$table,
+					$status_filter,
+					$like,
+					$like,
+					$like
+				)
+			);
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 			$entries = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT * FROM {$table} WHERE {$where_sql} ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d",
-					...$query_params
+					'SELECT * FROM %i WHERE status = %s AND (volunteer_name LIKE %s OR volunteer_email LIKE %s OR notes LIKE %s) ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d',
+					$table,
+					$status_filter,
+					$like,
+					$like,
+					$like,
+					VIT_ENTRIES_PER_PAGE,
+					$offset
+				)
+			);
+		} elseif ( $has_status ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i WHERE status = %s',
+					$table,
+					$status_filter
+				)
+			);
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$entries = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %i WHERE status = %s ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d',
+					$table,
+					$status_filter,
+					VIT_ENTRIES_PER_PAGE,
+					$offset
+				)
+			);
+		} elseif ( $has_search ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i WHERE (volunteer_name LIKE %s OR volunteer_email LIKE %s OR notes LIKE %s)',
+					$table,
+					$like,
+					$like,
+					$like
+				)
+			);
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$entries = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %i WHERE (volunteer_name LIKE %s OR volunteer_email LIKE %s OR notes LIKE %s) ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d',
+					$table,
+					$like,
+					$like,
+					$like,
+					VIT_ENTRIES_PER_PAGE,
+					$offset
 				)
 			);
 		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i',
+					$table
+				)
+			);
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 			$entries = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT * FROM {$table} ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d",
+					'SELECT * FROM %i ORDER BY date_served DESC, id DESC LIMIT %d OFFSET %d',
+					$table,
 					VIT_ENTRIES_PER_PAGE,
 					$offset
 				)
@@ -433,6 +498,7 @@ class VIT_Admin {
 				'approved_at' => current_time( 'mysql' ),
 			)
 		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$wpdb->insert( vit_table(), $row );
 
 		wp_safe_redirect( add_query_arg( 'added', '1', admin_url( 'admin.php?page=vit-volunteers' ) ) );
@@ -466,6 +532,7 @@ class VIT_Admin {
 		}
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$wpdb->update( vit_table(), $data, array( 'id' => $id ) );
 
 		if ( 'approved' === $data['status'] && 'approved' !== $existing->status ) {
@@ -486,11 +553,13 @@ class VIT_Admin {
 			return;
 		}
 		global $wpdb;
-		$table = vit_table();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['status_updated'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 			$status = isset( $_GET['new_status'] ) ? sanitize_key( wp_unslash( $_GET['new_status'] ) ) : '';
-			$count  = isset( $_GET['count'] ) ? absint( $_GET['count'] ) : 1;
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
+			$count = isset( $_GET['count'] ) ? absint( $_GET['count'] ) : 1;
 			if ( 'approved' === $status ) {
 				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html(
 					sprintf(
@@ -512,8 +581,13 @@ class VIT_Admin {
 			}
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$entries = $wpdb->get_results( "SELECT * FROM {$table} WHERE status = 'pending' ORDER BY date_served DESC, id DESC" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+		$entries = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE status = 'pending' ORDER BY date_served DESC, id DESC",
+				$wpdb->prefix . VIT_TABLE_HOURS
+			)
+		);
 		?>
 		<div class="wrap vit-wrap">
 			<h1><?php esc_html_e( 'Pending Approvals', 'volunteer-impact-tracker' ); ?></h1>
@@ -616,6 +690,7 @@ class VIT_Admin {
 			$data['approved_at'] = current_time( 'mysql' );
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$wpdb->update( vit_table(), $data, array( 'id' => $id ) );
 
 		if ( 'approved' === $status && 'approved' !== $existing->status ) {
@@ -633,7 +708,7 @@ class VIT_Admin {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'volunteer-impact-tracker' ) );
 		}
 		$id     = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
-		$status = isset( $_GET['status'] ) ? sanitize_key( $_GET['status'] ) : '';
+		$status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
 
 		if ( ! $id || ! in_array( $status, array( 'approved', 'rejected', 'pending' ), true ) ) {
 			wp_die( esc_html__( 'Invalid request.', 'volunteer-impact-tracker' ) );
@@ -708,6 +783,7 @@ class VIT_Admin {
 		}
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$wpdb->delete( vit_table(), array( 'id' => $id ), array( '%d' ) );
 
 		wp_safe_redirect( add_query_arg( 'deleted', '1', admin_url( 'admin.php?page=vit-volunteers' ) ) );

@@ -36,14 +36,19 @@ class VIT_Certificate {
 	}
 
 	public static function maybe_render() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated via signed sig + hash_equals, not WP nonce.
 		if ( empty( $_GET['vit_certificate'] ) ) {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated via signed sig + hash_equals, not WP nonce.
 		$email = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
-		$start = isset( $_GET['start'] ) ? vit_sanitize_date( wp_unslash( $_GET['start'] ) ) : '';
-		$end   = isset( $_GET['end'] ) ? vit_sanitize_date( wp_unslash( $_GET['end'] ) ) : '';
-		$sig   = isset( $_GET['sig'] ) ? sanitize_text_field( wp_unslash( $_GET['sig'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated via signed sig + hash_equals, not WP nonce.
+		$start = isset( $_GET['start'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_GET['start'] ) ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated via signed sig + hash_equals, not WP nonce.
+		$end = isset( $_GET['end'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_GET['end'] ) ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Authenticated via signed sig + hash_equals, not WP nonce.
+		$sig = isset( $_GET['sig'] ) ? sanitize_text_field( wp_unslash( $_GET['sig'] ) ) : '';
 
 		if ( empty( $email ) || empty( $start ) || empty( $end ) || empty( $sig ) ) {
 			wp_die( esc_html__( 'Invalid certificate link.', 'volunteer-impact-tracker' ) );
@@ -53,12 +58,12 @@ class VIT_Certificate {
 		}
 
 		global $wpdb;
-		$table = $wpdb->prefix . VIT_TABLE_HOURS;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE status = 'approved' AND volunteer_email = %s AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
+				"SELECT * FROM %i WHERE status = 'approved' AND volunteer_email = %s AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
+				$wpdb->prefix . VIT_TABLE_HOURS,
 				$email,
 				$start,
 				$end
@@ -92,6 +97,9 @@ class VIT_Certificate {
 		$date_range   = wp_date( get_option( 'date_format' ), strtotime( $start . ' 12:00:00' ) ) . ' – ' . wp_date( get_option( 'date_format' ), strtotime( $end . ' 12:00:00' ) );
 		$issued_date  = wp_date( get_option( 'date_format' ) );
 
+		wp_register_style( 'vit-certificate', VIT_PLUGIN_URL . 'assets/css/certificate.css', array(), VIT_VERSION );
+		wp_enqueue_style( 'vit-certificate' );
+
 		nocache_headers();
 		?>
 		<!DOCTYPE html>
@@ -100,7 +108,7 @@ class VIT_Certificate {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<title><?php echo esc_html( sprintf( /* translators: %s volunteer name */ __( 'Certificate of Service — %s', 'volunteer-impact-tracker' ), $name ) ); ?></title>
-			<link rel="stylesheet" href="<?php echo esc_url( VIT_PLUGIN_URL . 'assets/css/certificate.css?ver=' . rawurlencode( VIT_VERSION ) ); ?>">
+			<?php wp_print_styles( 'vit-certificate' ); ?>
 		</head>
 		<body>
 			<div class="vit-cert-toolbar no-print">

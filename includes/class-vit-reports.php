@@ -27,8 +27,10 @@ class VIT_Reports {
 
 	private static function get_filters() {
 		$year_start = current_time( 'Y' ) . '-01-01';
-		$start      = isset( $_GET['vit_start'] ) ? vit_sanitize_date( wp_unslash( $_GET['vit_start'] ) ) : $year_start;
-		$end        = isset( $_GET['vit_end'] ) ? vit_sanitize_date( wp_unslash( $_GET['vit_end'] ) ) : vit_today();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter query arg; capability checked by caller.
+		$start = isset( $_GET['vit_start'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_GET['vit_start'] ) ) ) : $year_start;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter query arg; capability checked by caller.
+		$end = isset( $_GET['vit_end'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_GET['vit_end'] ) ) ) : vit_today();
 
 		if ( '' === $start ) {
 			$start = $year_start;
@@ -47,16 +49,34 @@ class VIT_Reports {
 
 	private static function query_rows( $start, $end ) {
 		global $wpdb;
-		$table = vit_table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE status = 'approved' AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
+				"SELECT * FROM %i WHERE status = 'approved' AND date_served BETWEEN %s AND %s ORDER BY date_served ASC",
+				$wpdb->prefix . VIT_TABLE_HOURS,
 				$start,
 				$end
 			)
 		);
+	}
+
+	/**
+	 * Escape and echo one CSV row (streaming download; no file handle).
+	 *
+	 * @param array $fields Column values.
+	 */
+	private static function echo_csv_row( $fields ) {
+		$escaped = array();
+		foreach ( $fields as $field ) {
+			$field = (string) $field;
+			if ( strpos( $field, '"' ) !== false || strpos( $field, ',' ) !== false || strpos( $field, "\n" ) !== false || strpos( $field, "\r" ) !== false ) {
+				$field = '"' . str_replace( '"', '""', $field ) . '"';
+			}
+			$escaped[] = $field;
+		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV download body; fields escaped above.
+		echo implode( ',', $escaped ) . "\n";
 	}
 
 	public static function render() {
@@ -68,9 +88,11 @@ class VIT_Reports {
 		$rows                = self::query_rows( $start, $end );
 		$hourly_value        = (float) VIT_Settings::get( 'hourly_value', 33.49 );
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['cert_sent'] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Certificate email sent.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above.
 		if ( isset( $_GET['cert_error'] ) ) {
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Could not send certificate email.', 'volunteer-impact-tracker' ) . '</p></div>';
 		}
@@ -269,8 +291,8 @@ class VIT_Reports {
 			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
 		}
 
-		$start = isset( $_POST['vit_start'] ) ? vit_sanitize_date( wp_unslash( $_POST['vit_start'] ) ) : '';
-		$end   = isset( $_POST['vit_end'] ) ? vit_sanitize_date( wp_unslash( $_POST['vit_end'] ) ) : '';
+		$start = isset( $_POST['vit_start'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_POST['vit_start'] ) ) ) : '';
+		$end   = isset( $_POST['vit_end'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_POST['vit_end'] ) ) ) : '';
 		if ( '' === $start || '' === $end ) {
 			list( $start, $end ) = self::get_filters();
 		}
@@ -307,12 +329,10 @@ class VIT_Reports {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=volunteer-hours-' . $start . '-to-' . $end . '.csv' );
 
-		$output = fopen( 'php://output', 'w' );
-		fputcsv( $output, array( 'Volunteer Name', 'Volunteer Email', 'Opportunity', 'Hours', 'Date Served', 'Notes' ) );
+		self::echo_csv_row( array( 'Volunteer Name', 'Volunteer Email', 'Opportunity', 'Hours', 'Date Served', 'Notes' ) );
 
 		foreach ( $rows as $row ) {
-			fputcsv(
-				$output,
+			self::echo_csv_row(
 				array(
 					$row->volunteer_name,
 					$row->volunteer_email,
@@ -324,7 +344,6 @@ class VIT_Reports {
 			);
 		}
 
-		fclose( $output );
 		exit;
 	}
 }

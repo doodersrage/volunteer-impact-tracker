@@ -15,10 +15,9 @@ Checklist for publishing **Volunteer Impact Tracker** to the [Plugin Directory](
 ```bash
 # From the parent of the plugin folder:
 cd /home/robertsm/Projects
-zip -r volunteer-impact-tracker-1.1.1.zip volunteer-impact-tracker \
+zip -r volunteer-impact-tracker-1.1.2.zip volunteer-impact-tracker \
   -x 'volunteer-impact-tracker/.git/*' \
-  -x 'volunteer-impact-tracker/.wordpress-org/*' \
-  -x 'volunteer-impact-tracker/WORDPRESS-ORG.md'
+  -x 'volunteer-impact-tracker/.wordpress-org/*'
 ```
 
 ## Submit for review
@@ -37,15 +36,15 @@ Typical layout:
 ```
 /assets/          ← icons, banners, screenshots (from .wordpress-org/)
 /trunk/           ← latest development copy of the plugin
-/tags/1.1.1/      ← frozen release matching Stable tag
+/tags/1.1.2/      ← frozen release matching Stable tag
 ```
 
 1. Check out the empty repo.
 2. Copy plugin files into `trunk/` (exclude `.git` and `.wordpress-org`).
 3. Copy `.wordpress-org/*` images into `assets/`.
 4. Commit trunk + assets.
-5. Copy `trunk` to `tags/1.1.1` and commit.
-6. Ensure `readme.txt` **Stable tag** is `1.1.1`.
+5. Copy `trunk` to `tags/1.1.2` and commit.
+6. Ensure `readme.txt` **Stable tag** is `1.1.2`.
 
 Useful docs:
 

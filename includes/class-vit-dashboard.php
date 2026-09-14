@@ -25,29 +25,31 @@ class VIT_Dashboard {
 
 	public static function render() {
 		global $wpdb;
-		$table      = vit_table();
+		$table      = $wpdb->prefix . VIT_TABLE_HOURS;
 		$year_start = current_time( 'Y' ) . '-01-01';
 		$today      = vit_today();
 		$pending    = vit_pending_count();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$ytd_hours = (float) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COALESCE(SUM(hours),0) FROM {$table} WHERE status = 'approved' AND date_served BETWEEN %s AND %s",
+				"SELECT COALESCE(SUM(hours),0) FROM %i WHERE status = 'approved' AND date_served BETWEEN %s AND %s",
+				$table,
 				$year_start,
 				$today
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$top = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT volunteer_name, volunteer_email, SUM(hours) AS total_hours
-				FROM {$table}
+				FROM %i
 				WHERE status = 'approved' AND date_served BETWEEN %s AND %s
 				GROUP BY volunteer_email, volunteer_name
 				ORDER BY total_hours DESC
 				LIMIT 5",
+				$table,
 				$year_start,
 				$today
 			)

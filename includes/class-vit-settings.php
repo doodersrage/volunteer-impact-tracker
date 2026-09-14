@@ -95,6 +95,7 @@ class VIT_Settings {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Volunteer Tracker Settings', 'volunteer-impact-tracker' ); ?></h1>
 
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above. ?>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'volunteer-impact-tracker' ); ?></p></div>
 			<?php endif; ?>
@@ -211,7 +212,7 @@ class VIT_Settings {
 			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
 		}
 
-		$hourly = isset( $_POST['hourly_value'] ) ? (float) wp_unslash( $_POST['hourly_value'] ) : 0;
+		$hourly = isset( $_POST['hourly_value'] ) ? (float) sanitize_text_field( wp_unslash( $_POST['hourly_value'] ) ) : 0;
 		if ( $hourly < 0 ) {
 			$hourly = 0;
 		}
@@ -220,7 +221,7 @@ class VIT_Settings {
 		if ( ! empty( $_POST['manager_roles'] ) && is_array( $_POST['manager_roles'] ) ) {
 			$valid = array_keys( wp_roles()->roles );
 			foreach ( wp_unslash( $_POST['manager_roles'] ) as $slug ) {
-				$slug = sanitize_key( $slug );
+				$slug = sanitize_key( sanitize_text_field( $slug ) );
 				if ( in_array( $slug, $valid, true ) && ! in_array( $slug, $manager_roles, true ) ) {
 					$manager_roles[] = $slug;
 				}

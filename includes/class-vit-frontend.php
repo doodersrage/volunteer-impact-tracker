@@ -64,7 +64,9 @@ class VIT_Frontend {
 
 		ob_start();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg.
 		if ( isset( $_GET['vit_submitted'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg.
 			$mode = isset( $_GET['vit_mode'] ) ? sanitize_key( wp_unslash( $_GET['vit_mode'] ) ) : '';
 			if ( 'approved' === $mode ) {
 				echo '<p class="vit-success">' . esc_html__( 'Thanks! Your hours have been recorded.', 'volunteer-impact-tracker' ) . '</p>';
@@ -72,6 +74,7 @@ class VIT_Frontend {
 				echo '<p class="vit-success">' . esc_html__( 'Thanks! Your hours have been submitted and are waiting for approval.', 'volunteer-impact-tracker' ) . '</p>';
 			}
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg.
 		if ( isset( $_GET['vit_error'] ) ) {
 			echo '<p class="vit-error">' . esc_html__( 'Please check your entries and try again. Hours must be between 0.25 and 24, and the date cannot be in the future.', 'volunteer-impact-tracker' ) . '</p>';
 		}
@@ -143,6 +146,7 @@ class VIT_Frontend {
 			ob_start();
 			echo '<p class="vit-login-required">';
 			printf(
+				/* translators: %s: login URL */
 				wp_kses_post( __( 'Please <a href="%s">log in</a> to view your volunteer hours.', 'volunteer-impact-tracker' ) ),
 				esc_url( $login_url )
 			);
@@ -158,8 +162,8 @@ class VIT_Frontend {
 			'vit_my_hours'
 		);
 
-		$user  = wp_get_current_user();
-		$year  = absint( $atts['year'] );
+		$user = wp_get_current_user();
+		$year = absint( $atts['year'] );
 		if ( $year < 2000 || $year > 2100 ) {
 			$year = (int) current_time( 'Y' );
 		}
@@ -167,15 +171,15 @@ class VIT_Frontend {
 		$end   = $year . '-12-31';
 
 		global $wpdb;
-		$table = vit_table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$entries = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table}
+				'SELECT * FROM %i
 				WHERE date_served BETWEEN %s AND %s
 				AND (user_id = %d OR volunteer_email = %s)
-				ORDER BY date_served DESC, id DESC",
+				ORDER BY date_served DESC, id DESC',
+				$wpdb->prefix . VIT_TABLE_HOURS,
 				$start,
 				$end,
 				$user->ID,
@@ -245,17 +249,20 @@ class VIT_Frontend {
 			wp_die( esc_html__( 'You must be logged in to submit hours.', 'volunteer-impact-tracker' ) );
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$redirect = isset( $_POST['vit_redirect'] ) ? esc_url_raw( wp_unslash( $_POST['vit_redirect'] ) ) : home_url( '/' );
+
 		if ( ! empty( $_POST['vit_website'] ) ) {
-			self::redirect_back( 'approved' );
+			self::redirect_back( $redirect, 'approved' );
 		}
 
 		$name  = isset( $_POST['volunteer_name'] ) ? sanitize_text_field( wp_unslash( $_POST['volunteer_name'] ) ) : '';
 		$email = isset( $_POST['volunteer_email'] ) ? sanitize_email( wp_unslash( $_POST['volunteer_email'] ) ) : '';
-		$hours = isset( $_POST['hours'] ) ? vit_sanitize_hours( wp_unslash( $_POST['hours'] ) ) : 0;
-		$date  = isset( $_POST['date_served'] ) ? vit_sanitize_date( wp_unslash( $_POST['date_served'] ) ) : '';
+		$hours = isset( $_POST['hours'] ) ? vit_sanitize_hours( sanitize_text_field( wp_unslash( $_POST['hours'] ) ) ) : 0;
+		$date  = isset( $_POST['date_served'] ) ? vit_sanitize_date( sanitize_text_field( wp_unslash( $_POST['date_served'] ) ) ) : '';
 
 		if ( empty( $name ) || empty( $email ) || $hours <= 0 || empty( $date ) || $date > vit_today() ) {
-			self::redirect_back( '', true );
+			self::redirect_back( $redirect, '', true );
 		}
 
 		$opportunity_id = ! empty( $_POST['opportunity_id'] ) ? absint( $_POST['opportunity_id'] ) : 0;
@@ -268,6 +275,7 @@ class VIT_Frontend {
 		$status           = $require_approval ? 'pending' : 'approved';
 		$user_id          = get_current_user_id();
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$wpdb->insert(
 			vit_table(),
 			array(
@@ -292,13 +300,20 @@ class VIT_Frontend {
 				VIT_Emails::notify_pending( $entry );
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		self::redirect_back( $status );
+		self::redirect_back( $redirect, $status );
 	}
 
-	private static function redirect_back( $mode = '', $error = false ) {
-		$redirect = isset( $_POST['vit_redirect'] ) ? esc_url_raw( wp_unslash( $_POST['vit_redirect'] ) ) : home_url( '/' );
-		$args     = array();
+	/**
+	 * Redirect back to the form page with a flash query arg.
+	 *
+	 * @param string $redirect Safe redirect URL (already read from POST).
+	 * @param string $mode     Status mode for success flash.
+	 * @param bool   $error    Whether to show the error flash.
+	 */
+	private static function redirect_back( $redirect, $mode = '', $error = false ) {
+		$args = array();
 		if ( $error ) {
 			$args['vit_error'] = '1';
 		} else {

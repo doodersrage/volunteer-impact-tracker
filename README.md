@@ -2,9 +2,9 @@
 
 WordPress plugin for nonprofits to **log volunteer hours**, approve self-reports, export grant-ready reports, and issue printable certificates of service.
 
-**Current version:** 1.1.1 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
+**Current version:** 1.1.2 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
 
-> Preparing for the WordPress.org directory? See [WORDPRESS-ORG.md](WORDPRESS-ORG.md).
+> Preparing for the WordPress.org directory? See [.wordpress-org/SUBMISSION.md](.wordpress-org/SUBMISSION.md).
 
 ## Why it exists
 
@@ -28,7 +28,7 @@ It is intentionally narrow — not a donation, events, or membership system.
 
 ## Requirements
 
-- WordPress 6.0+
+- WordPress 6.2+
 - PHP 7.4+
 
 ## Installation

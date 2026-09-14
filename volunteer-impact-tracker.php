@@ -3,8 +3,8 @@
  * Plugin Name:       Volunteer Impact Tracker
  * Plugin URI:         https://github.com/doodersrage/volunteer-impact-tracker
  * Description:        Log volunteer hours, approve self-reports, and generate grant-ready reports and printable certificates.
- * Version:            1.1.1
- * Requires at least:  6.0
+ * Version:            1.1.2
+ * Requires at least:  6.2
  * Requires PHP:       7.4
  * Author:             doodersrage
  * Author URI:         https://github.com/doodersrage
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'VIT_VERSION', '1.1.1' );
+define( 'VIT_VERSION', '1.1.2' );
 define( 'VIT_PLUGIN_FILE', __FILE__ );
 define( 'VIT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VIT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -45,8 +45,6 @@ register_deactivation_hook( __FILE__, array( 'VIT_Activator', 'deactivate' ) );
  * Boot the plugin once all plugins are loaded.
  */
 function vit_init() {
-	load_plugin_textdomain( 'volunteer-impact-tracker', false, dirname( plugin_basename( VIT_PLUGIN_FILE ) ) . '/languages' );
-
 	VIT_CPT::init();
 	VIT_Settings::init();
 	VIT_Emails::init();
@@ -136,9 +134,14 @@ function vit_sanitize_hours( $hours ) {
  */
 function vit_pending_count() {
 	global $wpdb;
-	$table = $wpdb->prefix . VIT_TABLE_HOURS;
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
-	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'pending'" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			'SELECT COUNT(*) FROM %i WHERE status = %s',
+			$wpdb->prefix . VIT_TABLE_HOURS,
+			'pending'
+		)
+	);
 }
 
 /**
@@ -149,9 +152,14 @@ function vit_pending_count() {
  */
 function vit_get_entry( $id ) {
 	global $wpdb;
-	$table = $wpdb->prefix . VIT_TABLE_HOURS;
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", absint( $id ) ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
+	$row = $wpdb->get_row(
+		$wpdb->prepare(
+			'SELECT * FROM %i WHERE id = %d',
+			$wpdb->prefix . VIT_TABLE_HOURS,
+			absint( $id )
+		)
+	);
 	return $row ? $row : null;
 }
 

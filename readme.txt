@@ -1,10 +1,10 @@
 === Volunteer Impact Tracker ===
 Contributors: doodersrage
 Tags: volunteer, nonprofit, hours tracking, certificate, reporting
-Requires at least: 6.0
+Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -99,6 +99,11 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 
 == Changelog ==
 
+= 1.1.2 =
+* Plugin Check fixes: translators comment, CSV streaming without fopen, certificate styles via wp_enqueue_style.
+* Custom-table SQL uses prepare %i identifiers; Requires at least 6.2.
+* Hardened sanitization, nonce phpcs annotations, and DirectDatabaseQuery ignores for the hours table.
+
 = 1.1.1 =
 * Prepared for WordPress.org: metadata, GPL LICENSE, Domain Path, privacy policy text, directory assets.
 * Short description and tags updated to directory limits; Tested up to 7.1.
@@ -123,6 +128,9 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 * Initial release: opportunities, hour logging, approval queue, reports, CSV export, printable certificates.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Plugin Check compliance release. Requires WordPress 6.2+.
 
 = 1.1.1 =
 WordPress.org readiness release: privacy text, LICENSE, and metadata fixes. Recommended before directory submission.

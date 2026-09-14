@@ -11,9 +11,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 global $wpdb;
 
-$table = $wpdb->prefix . 'vit_hours';
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- table name from trusted constant, uninstall routine.
-$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+$table = esc_sql( $wpdb->prefix . 'vit_hours' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DROP TABLE; table name escaped with esc_sql; %i not used with DROP.
+$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 
 delete_option( 'vit_settings' );
 delete_option( 'vit_db_version' );
