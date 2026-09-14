@@ -9,17 +9,17 @@ These files belong in the **SVN `/assets/`** folder on WordPress.org (not inside
 | `banner-772x250.png` | Directory header banner |
 | `banner-1544x500.png` | Retina banner |
 
-## Screenshots (add before or soon after approval)
+## Screenshots
 
-Capture from a local install and save here as:
+Saved for WordPress.org SVN `/assets/`:
 
 - `screenshot-1.png` — Log Hours
-- `screenshot-2.png` — Pending Approvals
-- `screenshot-3.png` — Reports
-- `screenshot-4.png` — Certificate print view
-- `screenshot-5.png` — Settings
+- `screenshot-2.png` — Reports
+- `screenshot-3.png` — Settings
 
 Captions in `readme.txt` under `== Screenshots ==` must match this numbering.
+
+Optional extras if you capture them later: Pending Approvals, printable certificate.
 
 After your plugin is approved, upload with SVN:
 

@@ -91,11 +91,9 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 
 == Screenshots ==
 
-1. Log Hours screen — add entries and browse recent volunteer time.
-2. Pending Approvals — review and bulk-approve self-reported hours.
-3. Reports — date-range totals, in-kind estimate, and certificates.
-4. Printable certificate of service.
-5. Settings — organization, workflow, emails, and manager roles.
+1. Log Hours — add approved volunteer hours from the admin screen.
+2. Reports — date-range totals, in-kind estimate, CSV export, and certificates.
+3. Settings — organization, workflow, emails, and manager roles.
 
 == Changelog ==
 
