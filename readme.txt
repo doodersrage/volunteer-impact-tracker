@@ -4,7 +4,7 @@ Tags: volunteer, nonprofit, hours tracking, certificate, reporting
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -98,6 +98,9 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 5. Settings — organization, workflow, emails, and manager roles.
 
 == Changelog ==
+
+= 1.1.3 =
+* Plugin Check: sanitize manager_roles via map_deep; ignore uninstall schema-change sniff for DROP TABLE.
 
 = 1.1.2 =
 * Plugin Check fixes: translators comment, CSV streaming without fopen, certificate styles via wp_enqueue_style.

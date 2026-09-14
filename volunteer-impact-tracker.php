@@ -3,7 +3,7 @@
  * Plugin Name:       Volunteer Impact Tracker
  * Plugin URI:         https://github.com/doodersrage/volunteer-impact-tracker
  * Description:        Log volunteer hours, approve self-reports, and generate grant-ready reports and printable certificates.
- * Version:            1.1.2
+ * Version:            1.1.3
  * Requires at least:  6.2
  * Requires PHP:       7.4
  * Author:             doodersrage
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'VIT_VERSION', '1.1.2' );
+define( 'VIT_VERSION', '1.1.3' );
 define( 'VIT_PLUGIN_FILE', __FILE__ );
 define( 'VIT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VIT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

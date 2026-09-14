@@ -218,10 +218,14 @@ class VIT_Settings {
 		}
 
 		$manager_roles = array( 'administrator' );
-		if ( ! empty( $_POST['manager_roles'] ) && is_array( $_POST['manager_roles'] ) ) {
+		$raw_roles     = array();
+		if ( isset( $_POST['manager_roles'] ) ) {
+			$raw_roles = map_deep( wp_unslash( $_POST['manager_roles'] ), 'sanitize_text_field' );
+		}
+		if ( is_array( $raw_roles ) ) {
 			$valid = array_keys( wp_roles()->roles );
-			foreach ( wp_unslash( $_POST['manager_roles'] ) as $slug ) {
-				$slug = sanitize_key( sanitize_text_field( $slug ) );
+			foreach ( $raw_roles as $slug ) {
+				$slug = sanitize_key( $slug );
 				if ( in_array( $slug, $valid, true ) && ! in_array( $slug, $manager_roles, true ) ) {
 					$manager_roles[] = $slug;
 				}
