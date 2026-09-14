@@ -1,14 +1,14 @@
 === Volunteer Impact Tracker ===
 Contributors: doodersrage
-Tags: volunteer, nonprofit, hours tracking, certificate, reporting, in-kind
+Tags: volunteer, nonprofit, hours tracking, certificate, reporting
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Log volunteer hours against opportunities, approve self-reported time, and generate reports and printable certificates for grant applications and board reporting.
+Log volunteer hours, approve self-reports, and generate grant-ready reports and printable certificates.
 
 == Description ==
 
@@ -49,11 +49,11 @@ The default per-hour value in Settings is a placeholder. Independent Sector publ
 
 == Installation ==
 
-1. Download or clone this repository into `/wp-content/plugins/volunteer-impact-tracker/`, or zip the folder and upload it via Plugins → Add New → Upload Plugin.
-2. Activate **Volunteer Impact Tracker**.
+1. Upload the plugin files to the `/wp-content/plugins/volunteer-impact-tracker` directory, or install the plugin through the WordPress plugins screen directly.
+2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **Volunteers → Settings** and set your organization name, hourly value, and preferred workflow options.
-4. Add opportunities under **Volunteers → Opportunities** (optional — hours can also be logged as "General").
-5. Add `[vit_log_hours]` and/or `[vit_my_hours]` to pages as needed.
+4. (Optional) Add opportunities under **Volunteers → Opportunities**.
+5. (Optional) Add `[vit_log_hours]` and/or `[vit_my_hours]` to a page.
 
 == Frequently Asked Questions ==
 
@@ -81,11 +81,28 @@ Yes — enable **Require Login** under Volunteers → Settings.
 
 Administrators always can. Under Settings you can also grant access to other roles (for example Editor).
 
+= What personal data does this plugin store? =
+
+Volunteer name, email, hours, dates, optional notes, and related opportunity references. See Settings → Privacy for suggested privacy-policy text, or the plugin's privacy policy suggestion on the Privacy Policy guide screen.
+
 = What happens when I delete the plugin? =
 
 The custom hours table and plugin settings are removed. Opportunity posts are left in place.
 
+== Screenshots ==
+
+1. Log Hours screen — add entries and browse recent volunteer time.
+2. Pending Approvals — review and bulk-approve self-reported hours.
+3. Reports — date-range totals, in-kind estimate, and certificates.
+4. Printable certificate of service.
+5. Settings — organization, workflow, emails, and manager roles.
+
 == Changelog ==
+
+= 1.1.1 =
+* Prepared for WordPress.org: metadata, GPL LICENSE, Domain Path, privacy policy text, directory assets.
+* Short description and tags updated to directory limits; Tested up to 7.1.
+* Certificate email action now uses POST; translated status labels.
 
 = 1.1.0 =
 * Edit existing hour entries (including status).
@@ -106,6 +123,9 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 * Initial release: opportunities, hour logging, approval queue, reports, CSV export, printable certificates.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+WordPress.org readiness release: privacy text, LICENSE, and metadata fixes. Recommended before directory submission.
 
 = 1.1.0 =
 Adds edit/search/pagination, bulk approvals, emails, my-hours shortcode, dashboard widget, and role assignment.

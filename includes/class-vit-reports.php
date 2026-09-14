@@ -189,25 +189,18 @@ class VIT_Reports {
 								<td><?php echo esc_html( number_format_i18n( $v['hours'], 2 ) ); ?></td>
 								<td>
 									<?php if ( $v['email'] ) : ?>
-										<?php
-										$cert_url  = VIT_Certificate::get_url( $v['email'], $start, $end );
-										$email_url = wp_nonce_url(
-											add_query_arg(
-												array(
-													'action' => 'vit_email_certificate',
-													'email'  => $v['email'],
-													'name'   => $v['name'],
-													'vit_start' => $start,
-													'vit_end'   => $end,
-												),
-												admin_url( 'admin-post.php' )
-											),
-											'vit_email_certificate_' . $v['email']
-										);
-										?>
+										<?php $cert_url = VIT_Certificate::get_url( $v['email'], $start, $end ); ?>
 										<a class="button button-small" target="_blank" rel="noopener" href="<?php echo esc_url( $cert_url ); ?>"><?php esc_html_e( 'View', 'volunteer-impact-tracker' ); ?></a>
 										<button type="button" class="button button-small vit-copy-link" data-url="<?php echo esc_attr( $cert_url ); ?>"><?php esc_html_e( 'Copy link', 'volunteer-impact-tracker' ); ?></button>
-										<a class="button button-small" href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Email', 'volunteer-impact-tracker' ); ?></a>
+										<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="vit-inline-form">
+											<input type="hidden" name="action" value="vit_email_certificate">
+											<input type="hidden" name="email" value="<?php echo esc_attr( $v['email'] ); ?>">
+											<input type="hidden" name="name" value="<?php echo esc_attr( $v['name'] ); ?>">
+											<input type="hidden" name="vit_start" value="<?php echo esc_attr( $start ); ?>">
+											<input type="hidden" name="vit_end" value="<?php echo esc_attr( $end ); ?>">
+											<?php wp_nonce_field( 'vit_email_certificate_' . $v['email'] ); ?>
+											<button type="submit" class="button button-small"><?php esc_html_e( 'Email', 'volunteer-impact-tracker' ); ?></button>
+										</form>
 									<?php else : ?>
 										<span class="description"><?php esc_html_e( 'Needs email', 'volunteer-impact-tracker' ); ?></span>
 									<?php endif; ?>
@@ -269,14 +262,19 @@ class VIT_Reports {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'volunteer-impact-tracker' ) );
 		}
 
-		$email = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
-		$name  = isset( $_GET['name'] ) ? sanitize_text_field( wp_unslash( $_GET['name'] ) ) : '';
-		if ( ! $email || ! isset( $_GET['_wpnonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'vit_email_certificate_' . $email ) ) {
+		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+		$name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+		if ( ! $email || ! isset( $_POST['_wpnonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'vit_email_certificate_' . $email ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
 		}
 
-		list( $start, $end ) = self::get_filters();
+		$start = isset( $_POST['vit_start'] ) ? vit_sanitize_date( wp_unslash( $_POST['vit_start'] ) ) : '';
+		$end   = isset( $_POST['vit_end'] ) ? vit_sanitize_date( wp_unslash( $_POST['vit_end'] ) ) : '';
+		if ( '' === $start || '' === $end ) {
+			list( $start, $end ) = self::get_filters();
+		}
+
 		$ok = VIT_Emails::send_certificate( $email, $name, $start, $end );
 
 		$args = array(

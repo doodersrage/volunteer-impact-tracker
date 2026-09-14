@@ -2,21 +2,23 @@
 /**
  * Plugin Name:       Volunteer Impact Tracker
  * Plugin URI:         https://github.com/doodersrage/volunteer-impact-tracker
- * Description:        Log volunteer hours against opportunities, approve self-reported time, and generate reports and printable certificates for grant applications and board reporting.
- * Version:            1.1.0
+ * Description:        Log volunteer hours, approve self-reports, and generate grant-ready reports and printable certificates.
+ * Version:            1.1.1
  * Requires at least:  6.0
  * Requires PHP:       7.4
- * Author:             Your Organization
+ * Author:             doodersrage
+ * Author URI:         https://github.com/doodersrage
  * License:            GPL v2 or later
  * License URI:        https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:        volunteer-impact-tracker
+ * Domain Path:        /languages
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'VIT_VERSION', '1.1.0' );
+define( 'VIT_VERSION', '1.1.1' );
 define( 'VIT_PLUGIN_FILE', __FILE__ );
 define( 'VIT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VIT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -55,6 +57,28 @@ function vit_init() {
 	VIT_Dashboard::init();
 }
 add_action( 'plugins_loaded', 'vit_init' );
+
+/**
+ * Suggest privacy-policy text for sites that store volunteer personal data.
+ */
+function vit_privacy_policy_content() {
+	if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+		return;
+	}
+
+	$content = sprintf(
+		'<p>%1$s</p><p>%2$s</p><p>%3$s</p>',
+		esc_html__( 'Volunteer Impact Tracker stores volunteer names, email addresses, hours served, dates, optional notes, and related opportunity references in a custom database table so your organization can approve time, run reports, and issue certificates.', 'volunteer-impact-tracker' ),
+		esc_html__( 'Certificate links include the volunteer email address and a cryptographic signature. Anyone with the exact link can view the certificate; links should be shared privately with the intended volunteer.', 'volunteer-impact-tracker' ),
+		esc_html__( 'Optional email notifications may send hour-submission or approval messages to site administrators and/or volunteers. Deleting the plugin removes the hours table and plugin settings; opportunity posts are left in place.', 'volunteer-impact-tracker' )
+	);
+
+	wp_add_privacy_policy_content(
+		__( 'Volunteer Impact Tracker', 'volunteer-impact-tracker' ),
+		wp_kses_post( $content )
+	);
+}
+add_action( 'admin_init', 'vit_privacy_policy_content' );
 
 /**
  * Keep the capability on roles configured in Settings (administrator always).
@@ -143,6 +167,21 @@ function vit_opportunity_label( $post ) {
 		return sprintf( '%s (%s)', $post->post_title, $date );
 	}
 	return $post->post_title;
+}
+
+/**
+ * Translated label for an entry status slug.
+ *
+ * @param string $status Status slug.
+ * @return string
+ */
+function vit_status_label( $status ) {
+	$labels = array(
+		'approved' => __( 'Approved', 'volunteer-impact-tracker' ),
+		'pending'  => __( 'Pending', 'volunteer-impact-tracker' ),
+		'rejected' => __( 'Rejected', 'volunteer-impact-tracker' ),
+	);
+	return isset( $labels[ $status ] ) ? $labels[ $status ] : $status;
 }
 
 /**

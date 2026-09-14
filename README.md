@@ -2,7 +2,9 @@
 
 WordPress plugin for nonprofits to **log volunteer hours**, approve self-reports, export grant-ready reports, and issue printable certificates of service.
 
-**Current version:** 1.1.0 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
+**Current version:** 1.1.1 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
+
+> Preparing for the WordPress.org directory? See [WORDPRESS-ORG.md](WORDPRESS-ORG.md).
 
 ## Why it exists
 
@@ -55,47 +57,6 @@ Then activate in **Plugins**.
 [vit_my_hours year="2025"]
 ```
 
-## Admin menu
-
-- **Log Hours** — add/edit; search and filter entries  
-- **Pending Approvals** — approve / reject (including bulk)  
-- **Opportunities** — events volunteers log against  
-- **Reports** — filters, totals, CSV, certificates  
-- **Settings** — org, rate, approval/login, emails, manager roles  
-
-## Certificates
-
-From **Reports**, use **View**, **Copy link**, or **Email**. Links are signed; anyone with the exact URL can open them — share privately.
-
-## Hour limits
-
-- **0.25–24** hours per entry  
-- Date served cannot be in the future (site timezone)  
-
-## In-kind dollar value
-
-Update the Settings hourly rate annually using a current published estimate before putting the figure in a grant or board report.
-
-## Uninstall
-
-Deleting the plugin removes the hours table and settings. Opportunity posts are kept.
-
-## Changelog
-
-See [`readme.txt`](readme.txt) for the full WordPress.org-style changelog.
-
-### 1.1.0
-
-Edit/search/pagination, bulk approvals, emails, `[vit_my_hours]`, dashboard widget, role assignment, require-login setting.
-
-### 1.0.1
-
-Certificate URL / timezone / validation fixes and admin QoL.
-
-### 1.0.0
-
-Initial release.
-
 ## License
 
-GPLv2 or later. See the plugin header and [GPL-2.0](https://www.gnu.org/licenses/gpl-2.0.html).
+GPLv2 or later — see [LICENSE](LICENSE).

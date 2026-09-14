@@ -122,7 +122,7 @@ class VIT_Frontend {
 			</p>
 
 			<p class="vit-hp" aria-hidden="true">
-				<label for="vit_website">Website</label>
+				<label for="vit_website"><?php esc_html_e( 'Website', 'volunteer-impact-tracker' ); ?></label>
 				<input type="text" id="vit_website" name="vit_website" tabindex="-1" autocomplete="off">
 			</p>
 
@@ -224,7 +224,7 @@ class VIT_Frontend {
 								<td><?php echo esc_html( $entry->date_served ); ?></td>
 								<td><?php echo $entry->opportunity_id ? esc_html( get_the_title( $entry->opportunity_id ) ) : esc_html__( 'General', 'volunteer-impact-tracker' ); ?></td>
 								<td><?php echo esc_html( number_format_i18n( (float) $entry->hours, 2 ) ); ?></td>
-								<td><span class="vit-status vit-status-<?php echo esc_attr( $entry->status ); ?>"><?php echo esc_html( ucfirst( $entry->status ) ); ?></span></td>
+								<td><span class="vit-status vit-status-<?php echo esc_attr( $entry->status ); ?>"><?php echo esc_html( vit_status_label( $entry->status ) ); ?></span></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
