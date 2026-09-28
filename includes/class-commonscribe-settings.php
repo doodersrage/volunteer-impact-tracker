@@ -6,18 +6,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin settings: org name, hourly value, workflow, emails, and manager roles.
  */
-class VIT_Settings {
+class COMMONSCRIBE_Settings {
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu' ) );
-		add_action( 'admin_post_vit_save_settings', array( __CLASS__, 'save' ) );
+		add_action( 'admin_post_commonscribe_save_settings', array( __CLASS__, 'save' ) );
 	}
 
 	public static function defaults() {
 		return array(
 			'org_name'                  => get_bloginfo( 'name' ),
 			'hourly_value'              => 33.49,
-			'certificate_text'          => __( 'In recognition of your generous service and dedication.', 'volunteer-impact-tracker' ),
+			'certificate_text'          => __( 'In recognition of your generous service and dedication.', 'commonscribe-volunteer-log' ),
 			'require_approval'          => 1,
 			'require_login'             => 0,
 			'notify_admin_pending'      => 1,
@@ -27,7 +27,7 @@ class VIT_Settings {
 	}
 
 	public static function get( $key = null, $default = null ) {
-		$settings = wp_parse_args( get_option( 'vit_settings', array() ), self::defaults() );
+		$settings = wp_parse_args( get_option( 'commonscribe_settings', array() ), self::defaults() );
 
 		if ( ! is_array( $settings['manager_roles'] ) ) {
 			$settings['manager_roles'] = array( 'administrator' );
@@ -44,7 +44,7 @@ class VIT_Settings {
 	}
 
 	/**
-	 * Sync VIT_CAPABILITY onto configured roles; remove from others (except keep cleaning).
+	 * Sync COMMONSCRIBE_CAPABILITY onto configured roles; remove from others (except keep cleaning).
 	 */
 	public static function sync_capabilities() {
 		$wanted = self::get( 'manager_roles', array( 'administrator' ) );
@@ -59,124 +59,124 @@ class VIT_Settings {
 				continue;
 			}
 			if ( in_array( $slug, $wanted, true ) ) {
-				if ( ! $role->has_cap( VIT_CAPABILITY ) ) {
-					$role->add_cap( VIT_CAPABILITY );
+				if ( ! $role->has_cap( COMMONSCRIBE_CAPABILITY ) ) {
+					$role->add_cap( COMMONSCRIBE_CAPABILITY );
 				}
-			} elseif ( $role->has_cap( VIT_CAPABILITY ) && 'administrator' !== $slug ) {
-				$role->remove_cap( VIT_CAPABILITY );
+			} elseif ( $role->has_cap( COMMONSCRIBE_CAPABILITY ) && 'administrator' !== $slug ) {
+				$role->remove_cap( COMMONSCRIBE_CAPABILITY );
 			}
 		}
 
 		// Administrator always retains the capability.
 		$admin = get_role( 'administrator' );
-		if ( $admin && ! $admin->has_cap( VIT_CAPABILITY ) ) {
-			$admin->add_cap( VIT_CAPABILITY );
+		if ( $admin && ! $admin->has_cap( COMMONSCRIBE_CAPABILITY ) ) {
+			$admin->add_cap( COMMONSCRIBE_CAPABILITY );
 		}
 	}
 
 	public static function add_menu() {
 		add_submenu_page(
-			'vit-volunteers',
-			__( 'Volunteer Tracker Settings', 'volunteer-impact-tracker' ),
-			__( 'Settings', 'volunteer-impact-tracker' ),
-			VIT_CAPABILITY,
-			'vit-settings',
+			'commonscribe-volunteers',
+			__( 'Volunteer Tracker Settings', 'commonscribe-volunteer-log' ),
+			__( 'Settings', 'commonscribe-volunteer-log' ),
+			COMMONSCRIBE_CAPABILITY,
+			'commonscribe-settings',
 			array( __CLASS__, 'render' )
 		);
 	}
 
 	public static function render() {
-		if ( ! current_user_can( VIT_CAPABILITY ) ) {
+		if ( ! current_user_can( COMMONSCRIBE_CAPABILITY ) ) {
 			return;
 		}
 		$settings = self::get();
 		$roles    = wp_roles()->roles;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Volunteer Tracker Settings', 'volunteer-impact-tracker' ); ?></h1>
+			<h1><?php esc_html_e( 'Volunteer Tracker Settings', 'commonscribe-volunteer-log' ); ?></h1>
 
 			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display query arg; capability checked above. ?>
 			<?php if ( isset( $_GET['updated'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'volunteer-impact-tracker' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'commonscribe-volunteer-log' ); ?></p></div>
 			<?php endif; ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="vit_save_settings">
-				<?php wp_nonce_field( 'vit_save_settings', 'vit_settings_nonce' ); ?>
+				<input type="hidden" name="action" value="commonscribe_save_settings">
+				<?php wp_nonce_field( 'commonscribe_save_settings', 'commonscribe_settings_nonce' ); ?>
 
-				<h2><?php esc_html_e( 'Organization', 'volunteer-impact-tracker' ); ?></h2>
+				<h2><?php esc_html_e( 'Organization', 'commonscribe-volunteer-log' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="org_name"><?php esc_html_e( 'Organization Name', 'volunteer-impact-tracker' ); ?></label></th>
+						<th scope="row"><label for="org_name"><?php esc_html_e( 'Organization Name', 'commonscribe-volunteer-log' ); ?></label></th>
 						<td><input type="text" class="regular-text" id="org_name" name="org_name" value="<?php echo esc_attr( $settings['org_name'] ); ?>">
-							<p class="description"><?php esc_html_e( 'Shown on printed certificates and in notification emails.', 'volunteer-impact-tracker' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Shown on printed certificates and in notification emails.', 'commonscribe-volunteer-log' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="hourly_value"><?php esc_html_e( 'Dollar Value per Volunteer Hour', 'volunteer-impact-tracker' ); ?></label></th>
+						<th scope="row"><label for="hourly_value"><?php esc_html_e( 'Dollar Value per Volunteer Hour', 'commonscribe-volunteer-log' ); ?></label></th>
 						<td>
 							$<input type="number" step="0.01" min="0" id="hourly_value" name="hourly_value" value="<?php echo esc_attr( $settings['hourly_value'] ); ?>" style="width:100px;">
 							<p class="description">
-								<?php esc_html_e( 'Used to estimate the in-kind dollar value of volunteer time in reports. Independent Sector publishes an updated national estimate each year — check their current figure and update this field annually rather than relying on the plugin default.', 'volunteer-impact-tracker' ); ?>
+								<?php esc_html_e( 'Used to estimate the in-kind dollar value of volunteer time in reports. Independent Sector publishes an updated national estimate each year — check their current figure and update this field annually rather than relying on the plugin default.', 'commonscribe-volunteer-log' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="certificate_text"><?php esc_html_e( 'Certificate Message', 'volunteer-impact-tracker' ); ?></label></th>
+						<th scope="row"><label for="certificate_text"><?php esc_html_e( 'Certificate Message', 'commonscribe-volunteer-log' ); ?></label></th>
 						<td>
 							<textarea id="certificate_text" name="certificate_text" rows="3" class="large-text"><?php echo esc_textarea( $settings['certificate_text'] ); ?></textarea>
 						</td>
 					</tr>
 				</table>
 
-				<h2><?php esc_html_e( 'Workflow', 'volunteer-impact-tracker' ); ?></h2>
+				<h2><?php esc_html_e( 'Workflow', 'commonscribe-volunteer-log' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Require Approval', 'volunteer-impact-tracker' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Require Approval', 'commonscribe-volunteer-log' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" id="require_approval" name="require_approval" value="1" <?php checked( 1, (int) $settings['require_approval'] ); ?>>
-								<?php esc_html_e( 'Self-reported hours must be approved before they count toward reports and certificates.', 'volunteer-impact-tracker' ); ?>
+								<?php esc_html_e( 'Self-reported hours must be approved before they count toward reports and certificates.', 'commonscribe-volunteer-log' ); ?>
 							</label>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Require Login', 'volunteer-impact-tracker' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Require Login', 'commonscribe-volunteer-log' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" id="require_login" name="require_login" value="1" <?php checked( 1, (int) $settings['require_login'] ); ?>>
-								<?php esc_html_e( 'Only logged-in users can submit hours via the front-end form.', 'volunteer-impact-tracker' ); ?>
+								<?php esc_html_e( 'Only logged-in users can submit hours via the front-end form.', 'commonscribe-volunteer-log' ); ?>
 							</label>
 						</td>
 					</tr>
 				</table>
 
-				<h2><?php esc_html_e( 'Email notifications', 'volunteer-impact-tracker' ); ?></h2>
+				<h2><?php esc_html_e( 'Email notifications', 'commonscribe-volunteer-log' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Admin notice', 'volunteer-impact-tracker' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Admin notice', 'commonscribe-volunteer-log' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" name="notify_admin_pending" value="1" <?php checked( 1, (int) $settings['notify_admin_pending'] ); ?>>
-								<?php esc_html_e( 'Email site admins when a volunteer submits hours that need approval.', 'volunteer-impact-tracker' ); ?>
+								<?php esc_html_e( 'Email site admins when a volunteer submits hours that need approval.', 'commonscribe-volunteer-log' ); ?>
 							</label>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Volunteer notice', 'volunteer-impact-tracker' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Volunteer notice', 'commonscribe-volunteer-log' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" name="notify_volunteer_approved" value="1" <?php checked( 1, (int) $settings['notify_volunteer_approved'] ); ?>>
-								<?php esc_html_e( 'Email the volunteer when their hours are approved.', 'volunteer-impact-tracker' ); ?>
+								<?php esc_html_e( 'Email the volunteer when their hours are approved.', 'commonscribe-volunteer-log' ); ?>
 							</label>
 						</td>
 					</tr>
 				</table>
 
-				<h2><?php esc_html_e( 'Who can manage volunteers', 'volunteer-impact-tracker' ); ?></h2>
+				<h2><?php esc_html_e( 'Who can manage volunteers', 'commonscribe-volunteer-log' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Roles', 'volunteer-impact-tracker' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Roles', 'commonscribe-volunteer-log' ); ?></th>
 						<td>
 							<?php foreach ( $roles as $slug => $role ) : ?>
 								<?php
@@ -187,29 +187,29 @@ class VIT_Settings {
 									<input type="checkbox" name="manager_roles[]" value="<?php echo esc_attr( $slug ); ?>" <?php checked( $checked ); ?> <?php disabled( $locked ); ?>>
 									<?php echo esc_html( translate_user_role( $role['name'] ) ); ?>
 									<?php if ( $locked ) : ?>
-										<span class="description"><?php esc_html_e( '(always included)', 'volunteer-impact-tracker' ); ?></span>
+										<span class="description"><?php esc_html_e( '(always included)', 'commonscribe-volunteer-log' ); ?></span>
 										<input type="hidden" name="manager_roles[]" value="administrator">
 									<?php endif; ?>
 								</label>
 							<?php endforeach; ?>
-							<p class="description"><?php esc_html_e( 'Selected roles can access the Volunteers admin screens.', 'volunteer-impact-tracker' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Selected roles can access the Volunteers admin screens.', 'commonscribe-volunteer-log' ); ?></p>
 						</td>
 					</tr>
 				</table>
 
-				<?php submit_button( __( 'Save Settings', 'volunteer-impact-tracker' ) ); ?>
+				<?php submit_button( __( 'Save Settings', 'commonscribe-volunteer-log' ) ); ?>
 			</form>
 		</div>
 		<?php
 	}
 
 	public static function save() {
-		if ( ! current_user_can( VIT_CAPABILITY ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'volunteer-impact-tracker' ) );
+		if ( ! current_user_can( COMMONSCRIBE_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'commonscribe-volunteer-log' ) );
 		}
-		if ( ! isset( $_POST['vit_settings_nonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['vit_settings_nonce'] ) ), 'vit_save_settings' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'volunteer-impact-tracker' ) );
+		if ( ! isset( $_POST['commonscribe_settings_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['commonscribe_settings_nonce'] ) ), 'commonscribe_save_settings' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'commonscribe-volunteer-log' ) );
 		}
 
 		$hourly = isset( $_POST['hourly_value'] ) ? (float) sanitize_text_field( wp_unslash( $_POST['hourly_value'] ) ) : 0;
@@ -243,10 +243,10 @@ class VIT_Settings {
 			'manager_roles'             => $manager_roles,
 		);
 
-		update_option( 'vit_settings', $settings );
+		update_option( 'commonscribe_settings', $settings );
 		self::sync_capabilities();
 
-		wp_safe_redirect( add_query_arg( 'updated', '1', admin_url( 'admin.php?page=vit-settings' ) ) );
+		wp_safe_redirect( add_query_arg( 'updated', '1', admin_url( 'admin.php?page=commonscribe-settings' ) ) );
 		exit;
 	}
 }

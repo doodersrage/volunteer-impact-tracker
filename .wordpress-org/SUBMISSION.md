@@ -1,6 +1,6 @@
 # WordPress.org submission guide
 
-Checklist for publishing **Volunteer Impact Tracker** to the [Plugin Directory](https://wordpress.org/plugins/).
+Checklist for publishing **Commonscribe Volunteer Log** to the [Plugin Directory](https://wordpress.org/plugins/).
 
 ## Before you submit
 
@@ -10,14 +10,17 @@ Checklist for publishing **Volunteer Impact Tracker** to the [Plugin Directory](
 4. **Run Plugin Check** — Install the official [Plugin Check](https://wordpress.org/plugins/plugin-check/) plugin on a test site and fix any Errors.
 5. **Test on WordPress 7.1** — Activate, log hours, approve, export CSV, open a certificate, uninstall cleanly.
 6. **Screenshots** — Capture the five UI screens listed in `.wordpress-org/README.md` and add `screenshot-1.png` … `screenshot-5.png` there (and later to SVN `/assets/`).
-7. **Build the zip** — Zip the plugin folder contents so the archive root is `volunteer-impact-tracker/` with the main PHP file inside. Do **not** include `.git`, `.wordpress-org`, or this guide if you prefer a lean zip (assets go to SVN separately after approval).
+7. **Build the zip** — Zip the plugin folder contents so the archive root is `commonscribe-volunteer-log/` with the main PHP file inside. Do **not** include `.git`, `.wordpress-org`, or this guide if you prefer a lean zip (assets go to SVN separately after approval).
 
 ```bash
-# From the parent of the plugin folder:
+# The git checkout folder can keep its current name. The zip root must be the slug.
 cd /home/robertsm/Projects
-zip -r volunteer-impact-tracker-1.1.2.zip volunteer-impact-tracker \
-  -x 'volunteer-impact-tracker/.git/*' \
-  -x 'volunteer-impact-tracker/.wordpress-org/*'
+rm -rf /tmp/commonscribe-volunteer-log
+mkdir -p /tmp/commonscribe-volunteer-log
+rsync -a --exclude .git --exclude .wordpress-org \
+  volunteer-impact-tracker/ /tmp/commonscribe-volunteer-log/
+cd /tmp
+zip -r commonscribe-volunteer-log-1.2.0.zip commonscribe-volunteer-log
 ```
 
 ## Submit for review
@@ -29,22 +32,22 @@ zip -r volunteer-impact-tracker-1.1.2.zip volunteer-impact-tracker \
 
 ## After approval (SVN)
 
-You will receive an SVN URL similar to `https://plugins.svn.wordpress.org/volunteer-impact-tracker`.
+You will receive an SVN URL similar to `https://plugins.svn.wordpress.org/commonscribe-volunteer-log`.
 
 Typical layout:
 
 ```
 /assets/          ← icons, banners, screenshots (from .wordpress-org/)
 /trunk/           ← latest development copy of the plugin
-/tags/1.1.2/      ← frozen release matching Stable tag
+/tags/1.2.0/      ← frozen release matching Stable tag
 ```
 
 1. Check out the empty repo.
 2. Copy plugin files into `trunk/` (exclude `.git` and `.wordpress-org`).
 3. Copy `.wordpress-org/*` images into `assets/`.
 4. Commit trunk + assets.
-5. Copy `trunk` to `tags/1.1.2` and commit.
-6. Ensure `readme.txt` **Stable tag** is `1.1.2`.
+5. Copy `trunk` to `tags/1.2.0` and commit.
+6. Ensure `readme.txt` **Stable tag** is `1.2.0`.
 
 Useful docs:
 

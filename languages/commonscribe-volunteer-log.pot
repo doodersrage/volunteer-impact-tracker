@@ -1,16 +1,16 @@
 # Copyright (C) 2026 doodersrage
-# This file is distributed under the same license as the Volunteer Impact Tracker plugin.
+# This file is distributed under the same license as the Commonscribe Volunteer Log plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Volunteer Impact Tracker 1.1.1\n"
+"Project-Id-Version: Commonscribe Volunteer Log 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/doodersrage/volunteer-impact-tracker/issues\n"
 "POT-Creation-Date: 2026-09-14 14:00+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Domain: volunteer-impact-tracker\n"
+"X-Domain: commonscribe-volunteer-log\n"
 
-msgid "Volunteer Impact Tracker"
+msgid "Commonscribe Volunteer Log"
 msgstr ""
 
 msgid "Approved"

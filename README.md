@@ -1,8 +1,8 @@
-# Volunteer Impact Tracker
+# Commonscribe Volunteer Log
 
 WordPress plugin for nonprofits to **log volunteer hours**, approve self-reports, export grant-ready reports, and issue printable certificates of service.
 
-**Current version:** 1.1.3 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
+**Current version:** 1.2.0 · [GitHub](https://github.com/doodersrage/volunteer-impact-tracker)
 
 > Preparing for the WordPress.org directory? See [.wordpress-org/SUBMISSION.md](.wordpress-org/SUBMISSION.md).
 
@@ -18,7 +18,7 @@ It is intentionally narrow — not a donation, events, or membership system.
 | --- | --- |
 | Opportunities | CPT with date, location, optional capacity |
 | Log hours | Admin add/edit, search, pagination; front-end self-report |
-| My hours | `[vit_my_hours]` for logged-in volunteers |
+| My hours | `[commonscribe_my_hours]` for logged-in volunteers |
 | Approvals | Pending queue, bulk actions, menu badge, admin notice |
 | Email | Pending alert, optional approval notice, send certificate |
 | Reports | Date-range totals, in-kind value, CSV export |
@@ -33,8 +33,8 @@ It is intentionally narrow — not a donation, events, or membership system.
 
 ## Installation
 
-1. Copy this folder to `wp-content/plugins/volunteer-impact-tracker/`, **or** zip it and upload via **Plugins → Add New → Upload Plugin**.
-2. Activate **Volunteer Impact Tracker**.
+1. Copy this folder to `wp-content/plugins/commonscribe-volunteer-log/`, **or** zip it and upload via **Plugins → Add New → Upload Plugin**.
+2. Activate **Commonscribe Volunteer Log**.
 3. Open **Volunteers → Settings** (org name, hourly rate, workflow, emails, roles).
 4. (Optional) Add opportunities under **Volunteers → Opportunities**.
 5. Add shortcodes to pages as needed.
@@ -51,10 +51,10 @@ Then activate in **Plugins**.
 ## Shortcodes
 
 ```
-[vit_log_hours]
-[vit_log_hours opportunity_id="123"]
-[vit_my_hours]
-[vit_my_hours year="2025"]
+[commonscribe_log_hours]
+[commonscribe_log_hours opportunity_id="123"]
+[commonscribe_my_hours]
+[commonscribe_my_hours year="2025"]
 ```
 
 ## License

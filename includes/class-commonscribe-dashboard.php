@@ -6,29 +6,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WP Admin dashboard widget: YTD hours, pending count, top volunteers.
  */
-class VIT_Dashboard {
+class COMMONSCRIBE_Dashboard {
 
 	public static function init() {
 		add_action( 'wp_dashboard_setup', array( __CLASS__, 'register' ) );
 	}
 
 	public static function register() {
-		if ( ! current_user_can( VIT_CAPABILITY ) ) {
+		if ( ! current_user_can( COMMONSCRIBE_CAPABILITY ) ) {
 			return;
 		}
 		wp_add_dashboard_widget(
-			'vit_dashboard',
-			__( 'Volunteer Impact', 'volunteer-impact-tracker' ),
+			'commonscribe_dashboard',
+			__( 'Commonscribe', 'commonscribe-volunteer-log' ),
 			array( __CLASS__, 'render' )
 		);
 	}
 
 	public static function render() {
 		global $wpdb;
-		$table      = $wpdb->prefix . VIT_TABLE_HOURS;
+		$table      = $wpdb->prefix . COMMONSCRIBE_TABLE_HOURS;
 		$year_start = current_time( 'Y' ) . '-01-01';
-		$today      = vit_today();
-		$pending    = vit_pending_count();
+		$today      = commonscribe_today();
+		$pending    = commonscribe_pending_count();
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table, no WP API.
 		$ytd_hours = (float) $wpdb->get_var(
@@ -55,23 +55,23 @@ class VIT_Dashboard {
 			)
 		);
 
-		$hourly = (float) VIT_Settings::get( 'hourly_value', 33.49 );
+		$hourly = (float) COMMONSCRIBE_Settings::get( 'hourly_value', 33.49 );
 		?>
 		<p>
 			<strong><?php echo esc_html( number_format_i18n( $ytd_hours, 2 ) ); ?></strong>
-			<?php esc_html_e( 'approved hours YTD', 'volunteer-impact-tracker' ); ?>
+			<?php esc_html_e( 'approved hours YTD', 'commonscribe-volunteer-log' ); ?>
 			·
 			$<?php echo esc_html( number_format_i18n( $ytd_hours * $hourly, 0 ) ); ?>
-			<?php esc_html_e( 'est. in-kind', 'volunteer-impact-tracker' ); ?>
+			<?php esc_html_e( 'est. in-kind', 'commonscribe-volunteer-log' ); ?>
 		</p>
 		<?php if ( $pending > 0 ) : ?>
 			<p>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=vit-pending' ) ); ?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=commonscribe-pending' ) ); ?>">
 					<?php
 					echo esc_html(
 						sprintf(
 							/* translators: %d: pending count */
-							_n( '%d entry awaiting approval', '%d entries awaiting approval', $pending, 'volunteer-impact-tracker' ),
+							_n( '%d entry awaiting approval', '%d entries awaiting approval', $pending, 'commonscribe-volunteer-log' ),
 							$pending
 						)
 					);
@@ -81,24 +81,24 @@ class VIT_Dashboard {
 		<?php endif; ?>
 
 		<?php if ( ! empty( $top ) ) : ?>
-			<p><strong><?php esc_html_e( 'Top volunteers (YTD)', 'volunteer-impact-tracker' ); ?></strong></p>
-			<ol class="vit-dash-top">
+			<p><strong><?php esc_html_e( 'Top volunteers (YTD)', 'commonscribe-volunteer-log' ); ?></strong></p>
+			<ol class="commonscribe-dash-top">
 				<?php foreach ( $top as $row ) : ?>
 					<li>
 						<?php echo esc_html( $row->volunteer_name ); ?>
 						— <?php echo esc_html( number_format_i18n( (float) $row->total_hours, 2 ) ); ?>
-						<?php esc_html_e( 'hrs', 'volunteer-impact-tracker' ); ?>
+						<?php esc_html_e( 'hrs', 'commonscribe-volunteer-log' ); ?>
 					</li>
 				<?php endforeach; ?>
 			</ol>
 		<?php else : ?>
-			<p class="description"><?php esc_html_e( 'No approved hours yet this year.', 'volunteer-impact-tracker' ); ?></p>
+			<p class="description"><?php esc_html_e( 'No approved hours yet this year.', 'commonscribe-volunteer-log' ); ?></p>
 		<?php endif; ?>
 
 		<p>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=vit-volunteers' ) ); ?>"><?php esc_html_e( 'Log Hours', 'volunteer-impact-tracker' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=commonscribe-volunteers' ) ); ?>"><?php esc_html_e( 'Log Hours', 'commonscribe-volunteer-log' ); ?></a>
 			|
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=vit-reports' ) ); ?>"><?php esc_html_e( 'Reports', 'volunteer-impact-tracker' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=commonscribe-reports' ) ); ?>"><?php esc_html_e( 'Reports', 'commonscribe-volunteer-log' ); ?></a>
 		</p>
 		<?php
 	}

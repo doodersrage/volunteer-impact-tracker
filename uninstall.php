@@ -11,10 +11,14 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 global $wpdb;
 
-$table = esc_sql( $wpdb->prefix . 'vit_hours' );
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Uninstall DROP TABLE; table name escaped with esc_sql.
-$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+foreach ( array( 'commonscribe_hours', 'vit_hours' ) as $suffix ) {
+	$table = esc_sql( $wpdb->prefix . $suffix );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Uninstall DROP TABLE; table name escaped with esc_sql.
+	$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+}
 
+delete_option( 'commonscribe_settings' );
+delete_option( 'commonscribe_db_version' );
 delete_option( 'vit_settings' );
 delete_option( 'vit_db_version' );
 
@@ -22,6 +26,7 @@ if ( function_exists( 'wp_roles' ) ) {
 	foreach ( array_keys( wp_roles()->roles ) as $slug ) {
 		$role = get_role( $slug );
 		if ( $role ) {
+			$role->remove_cap( 'manage_commonscribe_volunteers' );
 			$role->remove_cap( 'manage_vit_volunteers' );
 		}
 	}

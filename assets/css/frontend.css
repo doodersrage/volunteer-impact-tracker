@@ -1,82 +1,82 @@
-.vit-frontend-form {
+.commonscribe-frontend-form {
 	max-width: 480px;
 }
 
-.vit-frontend-form p {
+.commonscribe-frontend-form p {
 	margin-bottom: 14px;
 }
 
-.vit-frontend-form label {
+.commonscribe-frontend-form label {
 	display: block;
 	font-weight: 600;
 	margin-bottom: 4px;
 }
 
-.vit-frontend-form input[type="text"],
-.vit-frontend-form input[type="email"],
-.vit-frontend-form input[type="number"],
-.vit-frontend-form input[type="date"],
-.vit-frontend-form select,
-.vit-frontend-form textarea {
+.commonscribe-frontend-form input[type="text"],
+.commonscribe-frontend-form input[type="email"],
+.commonscribe-frontend-form input[type="number"],
+.commonscribe-frontend-form input[type="date"],
+.commonscribe-frontend-form select,
+.commonscribe-frontend-form textarea {
 	width: 100%;
 	max-width: 400px;
 	padding: 8px;
 	box-sizing: border-box;
 }
 
-.vit-frontend-form button[type="submit"] {
+.commonscribe-frontend-form button[type="submit"] {
 	cursor: pointer;
 }
 
-.vit-success {
+.commonscribe-success {
 	background: #edfaef;
 	border-left: 4px solid #46b450;
 	padding: 10px 14px;
 }
 
-.vit-error {
+.commonscribe-error {
 	background: #fcf0f1;
 	border-left: 4px solid #d63638;
 	padding: 10px 14px;
 }
 
-.vit-pinned-opportunity {
+.commonscribe-pinned-opportunity {
 	margin-bottom: 14px;
 }
 
-.vit-hp {
+.commonscribe-hp {
 	position: absolute;
 	left: -9999px;
 	height: 0;
 	overflow: hidden;
 }
 
-.vit-login-required a {
+.commonscribe-login-required a {
 	font-weight: 600;
 }
 
-.vit-my-hours-summary {
+.commonscribe-my-hours-summary {
 	margin-bottom: 16px;
 }
 
-.vit-my-hours-table {
+.commonscribe-my-hours-table {
 	width: 100%;
 	max-width: 640px;
 	border-collapse: collapse;
 }
 
-.vit-my-hours-table th,
-.vit-my-hours-table td {
+.commonscribe-my-hours-table th,
+.commonscribe-my-hours-table td {
 	text-align: left;
 	padding: 8px 10px;
 	border-bottom: 1px solid #ddd;
 }
 
-.vit-my-hours-table th {
+.commonscribe-my-hours-table th {
 	font-size: 13px;
 }
 
-.vit-status {
+.commonscribe-status {
 	display: inline-block;
 	padding: 2px 8px;
 	border-radius: 3px;
@@ -84,17 +84,17 @@
 	font-weight: 600;
 }
 
-.vit-status-approved {
+.commonscribe-status-approved {
 	background: #edfaef;
 	color: #1e6e2f;
 }
 
-.vit-status-pending {
+.commonscribe-status-pending {
 	background: #fcf9e8;
 	color: #8a6d00;
 }
 
-.vit-status-rejected {
+.commonscribe-status-rejected {
 	background: #fcf0f1;
 	color: #8a2424;
 }

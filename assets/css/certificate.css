@@ -6,7 +6,7 @@ body {
 	color: #2c2a25;
 }
 
-.vit-certificate {
+.commonscribe-certificate {
 	max-width: 720px;
 	margin: 0 auto;
 	background: #fffdf8;
@@ -17,7 +17,7 @@ body {
 	text-align: center;
 }
 
-.vit-cert-eyebrow {
+.commonscribe-cert-eyebrow {
 	letter-spacing: 3px;
 	text-transform: uppercase;
 	font-size: 13px;
@@ -25,18 +25,18 @@ body {
 	margin: 0 0 12px;
 }
 
-.vit-certificate h1 {
+.commonscribe-certificate h1 {
 	font-size: 30px;
 	margin: 0 0 28px;
 }
 
-.vit-cert-presented {
+.commonscribe-cert-presented {
 	font-size: 15px;
 	color: #555;
 	margin: 0 0 8px;
 }
 
-.vit-cert-name {
+.commonscribe-cert-name {
 	font-size: 32px;
 	font-weight: bold;
 	margin: 0 0 20px;
@@ -45,31 +45,31 @@ body {
 	padding-bottom: 8px;
 }
 
-.vit-cert-body {
+.commonscribe-cert-body {
 	font-size: 17px;
 	line-height: 1.6;
 	max-width: 520px;
 	margin: 0 auto 12px;
 }
 
-.vit-cert-value {
+.commonscribe-cert-value {
 	font-size: 15px;
 	color: #555;
 	margin: 0 0 20px;
 }
 
-.vit-cert-message {
+.commonscribe-cert-message {
 	font-style: italic;
 	color: #555;
 	margin: 0 0 28px;
 }
 
-.vit-cert-issued {
+.commonscribe-cert-issued {
 	font-size: 13px;
 	color: #888;
 }
 
-.vit-cert-print-hint {
+.commonscribe-cert-print-hint {
 	max-width: 720px;
 	margin: 16px auto 0;
 	text-align: center;
@@ -78,14 +78,14 @@ body {
 	font-family: sans-serif;
 }
 
-.vit-cert-toolbar {
+.commonscribe-cert-toolbar {
 	max-width: 720px;
 	margin: 0 auto 20px;
 	text-align: center;
 	font-family: sans-serif;
 }
 
-.vit-print-btn {
+.commonscribe-print-btn {
 	appearance: none;
 	border: 1px solid #b89b5e;
 	background: #fffdf8;
@@ -96,7 +96,7 @@ body {
 	border-radius: 4px;
 }
 
-.vit-print-btn:hover {
+.commonscribe-print-btn:hover {
 	background: #f7f0e0;
 }
 
@@ -105,7 +105,7 @@ body {
 		background: #fff;
 		padding: 0;
 	}
-	.vit-certificate {
+	.commonscribe-certificate {
 		border: 2px solid #b89b5e;
 		outline: none;
 	}

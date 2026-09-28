@@ -24,8 +24,8 @@ Optional extras if you capture them later: Pending Approvals, printable certific
 After your plugin is approved, upload with SVN:
 
 ```bash
-svn co https://plugins.svn.wordpress.org/volunteer-impact-tracker
-# copy these files into volunteer-impact-tracker/assets/
+svn co https://plugins.svn.wordpress.org/commonscribe-volunteer-log
+# copy these files into commonscribe-volunteer-log/assets/
 svn add assets/*
 svn ci -m "Add directory icons and banners"
 ```

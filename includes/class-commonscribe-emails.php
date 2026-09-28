@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Transactional emails: pending admin alert, volunteer approval, certificate send.
  */
-class VIT_Emails {
+class COMMONSCRIBE_Emails {
 
 	public static function init() {
 		// No hooks — called from other classes.
@@ -20,7 +20,7 @@ class VIT_Emails {
 	public static function admin_emails() {
 		$users = get_users(
 			array(
-				'capability' => VIT_CAPABILITY,
+				'capability' => COMMONSCRIBE_CAPABILITY,
 				'fields'     => array( 'user_email' ),
 			)
 		);
@@ -46,25 +46,25 @@ class VIT_Emails {
 	 * @param object $entry Hours row.
 	 */
 	public static function notify_pending( $entry ) {
-		if ( ! (int) VIT_Settings::get( 'notify_admin_pending', 1 ) ) {
+		if ( ! (int) COMMONSCRIBE_Settings::get( 'notify_admin_pending', 1 ) ) {
 			return;
 		}
 		if ( ! $entry || 'pending' !== $entry->status ) {
 			return;
 		}
 
-		$org     = VIT_Settings::get( 'org_name', get_bloginfo( 'name' ) );
+		$org     = COMMONSCRIBE_Settings::get( 'org_name', get_bloginfo( 'name' ) );
 		$subject = sprintf(
 			/* translators: %s: organization name */
-			__( '[%s] New volunteer hours awaiting approval', 'volunteer-impact-tracker' ),
+			__( '[%s] New volunteer hours awaiting approval', 'commonscribe-volunteer-log' ),
 			$org
 		);
-		$opp = $entry->opportunity_id ? get_the_title( $entry->opportunity_id ) : __( 'General', 'volunteer-impact-tracker' );
-		$url = admin_url( 'admin.php?page=vit-pending' );
+		$opp = $entry->opportunity_id ? get_the_title( $entry->opportunity_id ) : __( 'General', 'commonscribe-volunteer-log' );
+		$url = admin_url( 'admin.php?page=commonscribe-pending' );
 
 		$body = sprintf(
 			/* translators: 1: volunteer name, 2: hours, 3: date, 4: opportunity, 5: review URL */
-			__( "%1\$s submitted %2\$s hours on %3\$s (%4\$s).\n\nReview pending entries:\n%5\$s\n", 'volunteer-impact-tracker' ),
+			__( "%1\$s submitted %2\$s hours on %3\$s (%4\$s).\n\nReview pending entries:\n%5\$s\n", 'commonscribe-volunteer-log' ),
 			$entry->volunteer_name,
 			number_format_i18n( (float) $entry->hours, 2 ),
 			$entry->date_served,
@@ -83,24 +83,24 @@ class VIT_Emails {
 	 * @param object $entry Hours row.
 	 */
 	public static function notify_approved( $entry ) {
-		if ( ! (int) VIT_Settings::get( 'notify_volunteer_approved', 0 ) ) {
+		if ( ! (int) COMMONSCRIBE_Settings::get( 'notify_volunteer_approved', 0 ) ) {
 			return;
 		}
 		if ( ! $entry || empty( $entry->volunteer_email ) ) {
 			return;
 		}
 
-		$org     = VIT_Settings::get( 'org_name', get_bloginfo( 'name' ) );
+		$org     = COMMONSCRIBE_Settings::get( 'org_name', get_bloginfo( 'name' ) );
 		$subject = sprintf(
 			/* translators: %s: organization name */
-			__( '[%s] Your volunteer hours were approved', 'volunteer-impact-tracker' ),
+			__( '[%s] Your volunteer hours were approved', 'commonscribe-volunteer-log' ),
 			$org
 		);
-		$opp = $entry->opportunity_id ? get_the_title( $entry->opportunity_id ) : __( 'General', 'volunteer-impact-tracker' );
+		$opp = $entry->opportunity_id ? get_the_title( $entry->opportunity_id ) : __( 'General', 'commonscribe-volunteer-log' );
 
 		$body = sprintf(
 			/* translators: 1: volunteer name, 2: hours, 3: date, 4: opportunity, 5: org name */
-			__( "Hi %1\$s,\n\nYour %2\$s hours on %3\$s (%4\$s) have been approved by %5\$s. Thank you for volunteering!\n", 'volunteer-impact-tracker' ),
+			__( "Hi %1\$s,\n\nYour %2\$s hours on %3\$s (%4\$s) have been approved by %5\$s. Thank you for volunteering!\n", 'commonscribe-volunteer-log' ),
 			$entry->volunteer_name,
 			number_format_i18n( (float) $entry->hours, 2 ),
 			$entry->date_served,
@@ -126,17 +126,17 @@ class VIT_Emails {
 			return false;
 		}
 
-		$org     = VIT_Settings::get( 'org_name', get_bloginfo( 'name' ) );
-		$url     = VIT_Certificate::get_url( $email, $start, $end );
+		$org     = COMMONSCRIBE_Settings::get( 'org_name', get_bloginfo( 'name' ) );
+		$url     = COMMONSCRIBE_Certificate::get_url( $email, $start, $end );
 		$subject = sprintf(
 			/* translators: %s: organization name */
-			__( '[%s] Your certificate of volunteer service', 'volunteer-impact-tracker' ),
+			__( '[%s] Your certificate of volunteer service', 'commonscribe-volunteer-log' ),
 			$org
 		);
 
 		$body = sprintf(
 			/* translators: 1: volunteer name, 2: org, 3: start, 4: end, 5: certificate URL */
-			__( "Hi %1\$s,\n\n%2\$s has issued a certificate of service for your volunteer hours between %3\$s and %4\$s.\n\nView or print your certificate:\n%5\$s\n", 'volunteer-impact-tracker' ),
+			__( "Hi %1\$s,\n\n%2\$s has issued a certificate of service for your volunteer hours between %3\$s and %4\$s.\n\nView or print your certificate:\n%5\$s\n", 'commonscribe-volunteer-log' ),
 			$name ? $name : $email,
 			$org,
 			$start,

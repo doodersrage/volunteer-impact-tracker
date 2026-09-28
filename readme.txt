@@ -1,10 +1,10 @@
-=== Volunteer Impact Tracker ===
+=== Commonscribe Volunteer Log ===
 Contributors: doodersrage
 Tags: volunteer, nonprofit, hours tracking, certificate, reporting
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,12 +14,12 @@ Log volunteer hours, approve self-reports, and generate grant-ready reports and 
 
 Most WordPress volunteer plugins stop at signup: a volunteer registers for a shift, gets a reminder email, and that's it. Nothing tracks whether they actually showed up, how many hours they served over a year, or what that adds up to for a grant report — so nonprofits end up keeping that in a separate spreadsheet anyway.
 
-Volunteer Impact Tracker picks up where those plugins leave off:
+Commonscribe Volunteer Log picks up where those plugins leave off:
 
 * **Opportunities** — custom post type for volunteer opportunities/events (date, location, optional capacity).
 * **Log Hours** — admins can add, edit, search, and paginate entries; admin-logged hours are approved immediately.
-* **Self-report** — `[vit_log_hours]` front-end form; optional require-login setting.
-* **My hours** — `[vit_my_hours]` lets logged-in volunteers see their own entries and yearly totals.
+* **Self-report** — `[commonscribe_log_hours]` front-end form; optional require-login setting.
+* **My hours** — `[commonscribe_my_hours]` lets logged-in volunteers see their own entries and yearly totals.
 * **Approval queue** — pending queue with single and bulk approve/reject, menu badge, and admin notice.
 * **Email notifications** — optional alerts when hours need approval, when hours are approved, and certificate delivery from Reports.
 * **Reports** — date-range totals by volunteer and opportunity, in-kind dollar estimate, CSV export.
@@ -31,9 +31,9 @@ This plugin is intentionally narrow. It doesn't replace donation, event, or memb
 
 = Shortcodes =
 
-`[vit_log_hours]` — self-report form. Optional: `[vit_log_hours opportunity_id="123"]`.
+`[commonscribe_log_hours]` — self-report form. Optional: `[commonscribe_log_hours opportunity_id="123"]`.
 
-`[vit_my_hours]` — logged-in volunteer's hours for the current year. Optional: `[vit_my_hours year="2025"]`.
+`[commonscribe_my_hours]` — logged-in volunteer's hours for the current year. Optional: `[commonscribe_my_hours year="2025"]`.
 
 = Admin screens =
 
@@ -49,11 +49,11 @@ The default per-hour value in Settings is a placeholder. Independent Sector publ
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/volunteer-impact-tracker` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/commonscribe-volunteer-log` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **Volunteers → Settings** and set your organization name, hourly value, and preferred workflow options.
 4. (Optional) Add opportunities under **Volunteers → Opportunities**.
-5. (Optional) Add `[vit_log_hours]` and/or `[vit_my_hours]` to a page.
+5. (Optional) Add `[commonscribe_log_hours]` and/or `[commonscribe_my_hours]` to a page.
 
 == Frequently Asked Questions ==
 
@@ -97,6 +97,11 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 
 == Changelog ==
 
+= 1.2.0 =
+* Renamed to Commonscribe Volunteer Log. Text domain, prefixes, and stored keys no longer use Volunteer Impact Tracker.
+* Shortcodes are now `[commonscribe_log_hours]` and `[commonscribe_my_hours]`.
+* Admin and certificate JavaScript is enqueued instead of printed inline.
+
 = 1.1.3 =
 * Plugin Check: sanitize manager_roles via map_deep; ignore uninstall schema-change sniff for DROP TABLE.
 
@@ -115,7 +120,7 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 * Search and pagination on the entries list.
 * Bulk approve/reject on Pending Approvals.
 * Require Login setting for the self-report form.
-* New `[vit_my_hours]` shortcode for logged-in volunteers.
+* New `[commonscribe_my_hours]` shortcode for logged-in volunteers.
 * Email notifications for pending submissions and approved hours.
 * Email certificate from Reports.
 * Dashboard widget with YTD hours, pending count, and top volunteers.
@@ -129,6 +134,9 @@ The custom hours table and plugin settings are removed. Opportunity posts are le
 * Initial release: opportunities, hour logging, approval queue, reports, CSV export, printable certificates.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Renamed to Commonscribe Volunteer Log. Replace `[vit_log_hours]` and `[vit_my_hours]` with `[commonscribe_log_hours]` and `[commonscribe_my_hours]`, then activate the new plugin so existing hours are moved to the new table.
 
 = 1.1.2 =
 Plugin Check compliance release. Requires WordPress 6.2+.

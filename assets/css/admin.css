@@ -1,4 +1,4 @@
-.vit-wrap .vit-form {
+.commonscribe-wrap .commonscribe-form {
 	max-width: 640px;
 	background: #fff;
 	padding: 16px 20px;
@@ -6,14 +6,14 @@
 	border-radius: 4px;
 }
 
-.vit-summary-cards {
+.commonscribe-summary-cards {
 	display: flex;
 	gap: 16px;
 	margin: 16px 0;
 	flex-wrap: wrap;
 }
 
-.vit-card {
+.commonscribe-card {
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
@@ -21,21 +21,21 @@
 	min-width: 180px;
 }
 
-.vit-card-value {
+.commonscribe-card-value {
 	display: block;
 	font-size: 28px;
 	font-weight: 600;
 	line-height: 1.2;
 }
 
-.vit-card-label {
+.commonscribe-card-label {
 	display: block;
 	color: #646970;
 	font-size: 13px;
 	margin-top: 4px;
 }
 
-.vit-filter-form {
+.commonscribe-filter-form {
 	display: flex;
 	align-items: center;
 	gap: 12px;
@@ -43,13 +43,13 @@
 	margin: 12px 0;
 }
 
-.vit-filter-form label {
+.commonscribe-filter-form label {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 }
 
-.vit-status {
+.commonscribe-status {
 	display: inline-block;
 	padding: 2px 8px;
 	border-radius: 3px;
@@ -58,44 +58,44 @@
 	line-height: 1.6;
 }
 
-.vit-status-approved {
+.commonscribe-status-approved {
 	background: #edfaef;
 	color: #1e6e2f;
 }
 
-.vit-status-pending {
+.commonscribe-status-pending {
 	background: #fcf9e8;
 	color: #8a6d00;
 }
 
-.vit-status-rejected {
+.commonscribe-status-rejected {
 	background: #fcf0f1;
 	color: #8a2424;
 }
 
-.vit-copy-link {
+.commonscribe-copy-link {
 	margin-left: 4px;
 }
 
-.vit-inline-form {
+.commonscribe-inline-form {
 	display: inline;
 	margin: 0;
 }
 
-.vit-bulk-bar {
+.commonscribe-bulk-bar {
 	margin: 12px 0;
 	display: flex;
 	gap: 8px;
 }
 
-.vit-pagination {
+.commonscribe-pagination {
 	margin-top: 12px;
 }
 
-.vit-pagination .button {
+.commonscribe-pagination .button {
 	margin-right: 4px;
 }
 
-.vit-dash-top {
+.commonscribe-dash-top {
 	margin: 0 0 12px 1.2em;
 }
